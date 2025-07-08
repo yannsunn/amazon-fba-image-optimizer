@@ -4,6 +4,17 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 export async function POST(request: NextRequest) {
   try {
+    // バックエンドが設定されていない場合のエラーメッセージ
+    if (!process.env.BACKEND_URL) {
+      return NextResponse.json(
+        { 
+          error: 'Backend URL not configured',
+          message: 'Please set BACKEND_URL environment variable in Vercel dashboard'
+        },
+        { status: 503 }
+      );
+    }
+
     const formData = await request.formData();
     
     // バックエンドAPIにリクエストを転送
@@ -25,8 +36,13 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('API route error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        message: errorMessage,
+        backendUrl: BACKEND_URL 
+      },
       { status: 500 }
     );
   }
