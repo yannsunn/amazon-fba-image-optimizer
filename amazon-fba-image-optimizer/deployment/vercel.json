@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "app/api/process/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/batch/[batchId]/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/batch/[batchId]/download/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "BACKEND_URL": "@backend-url"
+  }
+}
