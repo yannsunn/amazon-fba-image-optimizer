@@ -23,7 +23,7 @@ export default function Home() {
     setError(null);
     
     const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
+    files.forEach(file => formData.append('images', file));
     
     try {
       const response = await fetch('/api/process', {
@@ -31,14 +31,14 @@ export default function Home() {
         body: formData,
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
       const data = await response.json();
       
+      if (!response.ok) {
+        throw new Error(data.message || data.error || `エラーが発生しました (${response.status})`);
+      }
+      
       if (data.error) {
-        throw new Error(data.error);
+        throw new Error(data.message || data.error);
       }
       
       setBatchInfo(data);
@@ -73,21 +73,21 @@ export default function Home() {
           <div className="text-4xl mb-4">🎯</div>
           <h3 className="text-lg font-semibold mb-2">AI画像強化</h3>
           <p className="text-sm text-gray-600">
-            シャープネス、コントラスト、彩度を自動調整
+            Cloudinary AIで画質を自動最適化
           </p>
         </div>
         <div className="card text-center">
           <div className="text-4xl mb-4">📐</div>
           <h3 className="text-lg font-semibold mb-2">自動リサイズ</h3>
           <p className="text-sm text-gray-600">
-            2000x2000pxの正方形に最適化
+            Amazon推奨サイズに自動調整
           </p>
         </div>
         <div className="card text-center">
           <div className="text-4xl mb-4">💾</div>
-          <h3 className="text-lg font-semibold mb-2">ファイル最適化</h3>
+          <h3 className="text-lg font-semibold mb-2">無料枠管理</h3>
           <p className="text-sm text-gray-600">
-            10MB以下に圧縮しながら品質を保持
+            月25,000回の変換まで無料
           </p>
         </div>
       </div>
