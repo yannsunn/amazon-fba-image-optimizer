@@ -1,17 +1,17 @@
 {
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/.next",
-  "installCommand": "cd frontend && npm install",
+  "buildCommand": "cd amazon-fba-image-optimizer/frontend && npm run build",
+  "outputDirectory": "amazon-fba-image-optimizer/frontend/.next",
+  "installCommand": "cd amazon-fba-image-optimizer/frontend && npm install",
   "framework": "nextjs",
   "regions": ["hnd1"],
   "functions": {
-    "frontend/app/api/*/route.ts": {
+    "amazon-fba-image-optimizer/frontend/app/api/*/route.ts": {
       "maxDuration": 30
     },
-    "frontend/app/api/*/*/route.ts": {
+    "amazon-fba-image-optimizer/frontend/app/api/*/*/route.ts": {
       "maxDuration": 30
     },
-    "frontend/app/api/*/*/*/route.ts": {
+    "amazon-fba-image-optimizer/frontend/app/api/*/*/*/route.ts": {
       "maxDuration": 30
     }
   }
