@@ -14,9 +14,9 @@
 ## 3. Vercelで環境変数を設定
 以下の環境変数を追加：
 ```
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_CLOUD_NAME=dqgok1rpu
+CLOUDINARY_API_KEY=777538161427182
+CLOUDINARY_API_SECRET=ido94TbBThCMNV1p-qaFlR92AY4
 ```
 
 ## 4. 無料枠の制限
