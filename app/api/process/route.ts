@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadAndOptimizeImage, checkUsageLimit } from '@/lib/cloudinary';
+import { uploadAndOptimizeImage, checkUsageLimit } from '../../../lib/cloudinary';
 import {
   validateFileSize,
   validateFileType,
@@ -7,7 +7,7 @@ import {
   getClientIp,
   SECURITY_CONFIG,
   getSecurityHeaders,
-} from '@/lib/security';
+} from '../../../lib/security';
 
 export async function POST(request: NextRequest) {
   try {

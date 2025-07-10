@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { validateOrigin, getSecurityHeaders } from '@/lib/security';
+import { validateOrigin, getSecurityHeaders } from './lib/security';
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
