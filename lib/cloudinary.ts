@@ -1,15 +1,46 @@
 import { v2 as cloudinary } from 'cloudinary';
 import type { CloudinaryUploadOptions, CloudinaryUploadResult, CloudinaryUsageLimit } from '../types/api';
 
-// Cloudinary設定
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Cloudinary設定を動的に行う
+function getCloudinaryConfig() {
+  const config = {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  };
+  
+  // 設定が有効か確認
+  if (!config.cloud_name || !config.api_key || !config.api_secret) {
+    console.error('Cloudinary configuration missing:', {
+      hasCloudName: !!config.cloud_name,
+      hasApiKey: !!config.api_key,
+      hasApiSecret: !!config.api_secret,
+    });
+    throw new Error('Cloudinary configuration is incomplete');
+  }
+  
+  return config;
+}
+
+// 初期化関数
+function initCloudinary() {
+  try {
+    const config = getCloudinaryConfig();
+    cloudinary.config(config);
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize Cloudinary:', error);
+    return false;
+  }
+}
 
 // 使用量チェック
 export async function checkUsageLimit() {
+  // Cloudinaryを初期化
+  if (!initCloudinary()) {
+    throw new Error('Cloudinary initialization failed');
+  }
+  
   try {
     const usage = await cloudinary.api.usage();
     
@@ -103,6 +134,11 @@ export async function uploadAndOptimizeImage(
     quality?: string;
   } = {}
 ): Promise<UploadResult> {
+  // Cloudinaryを初期化
+  if (!initCloudinary()) {
+    throw new Error('Cloudinary initialization failed');
+  }
+  
   // 使用量チェック
   const usageCheck = await checkUsageLimit();
   
