@@ -3,23 +3,35 @@ import type { CloudinaryUploadOptions, CloudinaryUploadResult, CloudinaryUsageLi
 
 // Cloudinary設定を動的に行う
 function getCloudinaryConfig() {
-  const config = {
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  };
+  // 環境変数を直接読み込む
+  const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
+  const api_key = process.env.CLOUDINARY_API_KEY;
+  const api_secret = process.env.CLOUDINARY_API_SECRET;
+  
+  console.log('Cloudinary config check:', {
+    cloud_name_exists: !!cloud_name,
+    api_key_exists: !!api_key,
+    api_secret_exists: !!api_secret,
+    cloud_name_length: cloud_name?.length || 0,
+    api_key_length: api_key?.length || 0,
+  });
   
   // 設定が有効か確認
-  if (!config.cloud_name || !config.api_key || !config.api_secret) {
-    console.error('Cloudinary configuration missing:', {
-      hasCloudName: !!config.cloud_name,
-      hasApiKey: !!config.api_key,
-      hasApiSecret: !!config.api_secret,
-    });
-    throw new Error('Cloudinary configuration is incomplete');
+  if (!cloud_name || !api_key || !api_secret) {
+    const errorDetails = {
+      cloud_name: cloud_name ? 'SET' : 'MISSING',
+      api_key: api_key ? 'SET' : 'MISSING',
+      api_secret: api_secret ? 'SET' : 'MISSING',
+    };
+    console.error('Cloudinary configuration missing:', errorDetails);
+    throw new Error(`Cloudinary configuration is incomplete: ${JSON.stringify(errorDetails)}`);
   }
   
-  return config;
+  return {
+    cloud_name,
+    api_key,
+    api_secret,
+  };
 }
 
 // 初期化関数
