@@ -24,25 +24,28 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
     setDownloadError(null);
     
     try {
-      const response = await fetch(`/api/batch/${batchInfo.batch_id}/download`);
+      // 画像URLをクエリパラメータとして渡す
+      const urls = batchInfo.image_urls.join(',');
+      const response = await fetch(`/api/batch/${batchInfo.batch_id}/download?urls=${encodeURIComponent(urls)}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+      // ZIPファイルをダウンロード
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      // ダウンロード開始
+      // ダウンロードリンクを作成
       const link = document.createElement('a');
-      link.href = data.download_url;
+      link.href = url;
       link.download = `amazon-fba-optimized-${batchInfo.batch_id}.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // メモリを解放
+      window.URL.revokeObjectURL(url);
       
     } catch (error) {
       console.error('ダウンロードエラー:', error);
@@ -172,7 +175,7 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
               <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
                 <button
                   onClick={() => handleIndividualDownload(url, index)}
-                  className="bg-white text-primary-600 px-3 py-1 rounded text-sm hover:bg-gray-100"
+                  className="bg-white text-blue-600 px-4 py-2 rounded text-sm font-medium hover:bg-gray-100 shadow-lg"
                 >
                   ダウンロード
                 </button>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+import JSZip from 'jszip';
+import { getSecurityHeaders } from '@/lib/security';
 
 export async function GET(
   request: NextRequest,
@@ -9,26 +9,61 @@ export async function GET(
   try {
     const { batchId } = params;
     
-    const response = await fetch(`${BACKEND_URL}/api/batch/${batchId}/download-url`, {
-      method: 'GET',
-    });
+    // URLからバッチ情報を取得（実際の実装では、データベースやキャッシュから取得）
+    const imageUrls = request.nextUrl.searchParams.get('urls')?.split(',') || [];
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    if (imageUrls.length === 0) {
       return NextResponse.json(
-        { error: errorData.detail || `Backend error: ${response.status}` },
-        { status: response.status }
+        { error: '画像URLが指定されていません' },
+        { status: 400, headers: getSecurityHeaders() }
       );
     }
     
-    const data = await response.json();
-    return NextResponse.json(data);
+    // ZIPファイルを作成
+    const zip = new JSZip();
+    
+    // 各画像をダウンロードしてZIPに追加
+    for (let i = 0; i < imageUrls.length; i++) {
+      try {
+        const response = await fetch(imageUrls[i]);
+        if (!response.ok) continue;
+        
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        // ファイル名を生成（拡張子を保持）
+        const extension = imageUrls[i].split('.').pop()?.split('?')[0] || 'jpg';
+        const filename = `optimized_${i + 1}.${extension}`;
+        
+        zip.file(filename, buffer);
+      } catch (error) {
+        console.error(`Failed to download image ${i}:`, error);
+      }
+    }
+    
+    // ZIPファイルを生成
+    const zipBuffer = await zip.generateAsync({
+      type: 'nodebuffer',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 9 }
+    });
+    
+    // レスポンスヘッダーを設定
+    const headers = new Headers(getSecurityHeaders());
+    headers.set('Content-Type', 'application/zip');
+    headers.set('Content-Disposition', `attachment; filename="batch_${batchId}.zip"`);
+    headers.set('Content-Length', zipBuffer.length.toString());
+    
+    return new NextResponse(zipBuffer, {
+      status: 200,
+      headers: headers
+    });
     
   } catch (error) {
-    console.error('Download API route error:', error);
+    console.error('Download API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: 'ダウンロード処理中にエラーが発生しました' },
+      { status: 500, headers: getSecurityHeaders() }
     );
   }
 }
