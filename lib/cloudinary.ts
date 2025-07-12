@@ -170,19 +170,41 @@ export async function uploadAndOptimizeImage(
       resource_type: 'image' as const,
       transformation: [
         {
-          width: options.width || 1500,
-          height: options.height || 1500,
-          crop: 'limit', // 最大サイズに制限
-          quality: options.quality || 'auto:best', // 自動最高品質
-          format: 'auto', // 最適なフォーマットを自動選択
-          flags: 'progressive', // プログレッシブJPEG
-          dpr: 'auto', // デバイスピクセル比自動調整
+          // Amazon FBA要件: 2000x2000px
+          width: 2000,
+          height: 2000,
+          crop: 'fill', // 2000x2000にフィットするようにリサイズ
+          gravity: 'center', // 中央を基準にクロップ
+          quality: 95, // 高品質（95%）
+          format: 'jpg', // JPEG形式で統一
+          flags: ['progressive'], // プログレッシブJPEG
+          // AI画質向上
+          effect: 'sharpen:100', // シャープネス向上
+          // ノイズ除去とエンハンス
+          enhance: true,
         },
       ],
-      // Amazon商品画像用の最適化
+      // Amazon商品画像用の最適化バリエーション
       eager: [
-        { width: 1000, height: 1000, crop: 'limit', quality: 'auto:best' }, // メイン画像
-        { width: 500, height: 500, crop: 'limit', quality: 'auto:good' },  // サムネイル
+        { 
+          width: 2000, 
+          height: 2000, 
+          crop: 'fill', 
+          gravity: 'center',
+          quality: 95,
+          format: 'jpg',
+          flags: ['progressive'],
+          effect: 'sharpen:100',
+          enhance: true,
+        }, // メイン画像（2000x2000）
+        { 
+          width: 1000, 
+          height: 1000, 
+          crop: 'fill', 
+          gravity: 'center',
+          quality: 90,
+          format: 'jpg',
+        },  // サムネイル（1000x1000）
       ],
     };
     

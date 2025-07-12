@@ -108,13 +108,14 @@ export async function POST(request: NextRequest) {
           success: true,
           result: {
             originalName: file.name,
-            optimizedUrl: result.url,
+            // メイン最適化画像（2000x2000 JPG）を使用
+            optimizedUrl: result.variants.main || result.url,
             mainImageUrl: result.variants.main,
             thumbnailUrl: result.variants.thumbnail,
             size: result.bytes,
             dimensions: {
-              width: result.width,
-              height: result.height,
+              width: 2000, // 固定で2000x2000
+              height: 2000,
             },
           },
         };
