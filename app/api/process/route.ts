@@ -162,9 +162,16 @@ export async function POST(request: NextRequest) {
     // バッチIDの生成
     const batchId = Date.now().toString();
     
+    // 画像URLのリストを作成
+    const imageUrls = results.map(result => result.url);
+    
     return NextResponse.json({
-      batchId,
-      totalFiles: files.length,
+      batch_id: batchId,
+      total_images: files.length,
+      processed_at: new Date().toISOString(),
+      image_urls: imageUrls,
+      status: 'completed',
+      // 追加情報
       processed: results.length,
       failed: errors.length,
       results,

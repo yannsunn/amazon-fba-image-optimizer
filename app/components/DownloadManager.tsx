@@ -162,7 +162,7 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
         <h3 className="text-xl font-semibold mb-4">個別ダウンロード</h3>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {batchInfo.image_urls.map((url, index) => (
+          {batchInfo.image_urls && batchInfo.image_urls.map((url, index) => (
             <div key={index} className="relative group">
               <img
                 src={url}
