@@ -132,56 +132,96 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
 
       {/* ダウンロードオプション */}
       <div className="card">
-        <h3 className="text-xl font-semibold mb-4">ダウンロード</h3>
+        <h3 className="text-xl font-semibold mb-4">💾 ダウンロードオプション</h3>
         
-        {/* 一括ダウンロード */}
-        <div className="space-y-4">
-          <button
-            onClick={handleDownload}
-            disabled={downloading}
-            className="btn-success w-full"
-          >
-            {downloading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ZIPファイル準備中...
-              </div>
-            ) : (
-              <div className="flex items-center justify-center">
-                <span className="mr-2">📦</span>
-                全画像を一括ダウンロード (ZIP)
-              </div>
-            )}
-          </button>
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* 一括ダウンロード（ZIP） */}
+          <div className="p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100">
+            <h4 className="font-semibold text-blue-700 mb-2">📦 一括ダウンロード</h4>
+            <p className="text-sm text-gray-600 mb-3">
+              すべての画像をZIPファイルでまとめてダウンロード
+            </p>
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {downloading ? (
+                <>
+                  <svg className="inline animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  ダウンロード中...
+                </>
+              ) : (
+                <>
+                  <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  </svg>
+                  ZIPでダウンロード
+                </>
+              )}
+            </button>
+          </div>
 
-          <div className="text-sm text-gray-600 text-center">
-            または個別にダウンロード
+          {/* 個別ダウンロード（選択） */}
+          <div className="p-4 border rounded-lg bg-gradient-to-br from-green-50 to-green-100">
+            <h4 className="font-semibold text-green-700 mb-2">🖼️ 個別ダウンロード</h4>
+            <p className="text-sm text-gray-600 mb-3">
+              画像を個別に選んでダウンロード
+            </p>
+            <button
+              onClick={() => {
+                const element = document.getElementById('individual-downloads');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+            >
+              <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              個別に選択
+            </button>
           </div>
         </div>
       </div>
 
       {/* 個別ダウンロード */}
-      <div className="card">
-        <h3 className="text-xl font-semibold mb-4">個別ダウンロード</h3>
+      <div id="individual-downloads" className="card">
+        <h3 className="text-xl font-semibold mb-4">🖼️ 個別ダウンロード</h3>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-600">
+            💡 ヒント: 画像をクリックすると個別にダウンロードできます
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {batchInfo.image_urls && batchInfo.image_urls.map((url, index) => (
-            <div key={index} className="relative group">
-              <img
-                src={url}
-                alt={`Optimized ${index + 1}`}
-                className="w-full h-32 object-cover rounded border"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+            <div key={index} className="space-y-2">
+              <div className="relative group cursor-pointer" onClick={() => handleIndividualDownload(url, index)}>
+                <img
+                  src={url}
+                  alt={`Optimized ${index + 1}`}
+                  className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-colors"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-opacity rounded-lg flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm font-medium text-gray-700">画像 {index + 1}</div>
                 <button
                   onClick={() => handleIndividualDownload(url, index)}
-                  className="bg-white text-blue-600 px-4 py-2 rounded text-sm font-medium hover:bg-gray-100 shadow-lg"
+                  className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
                 >
                   ダウンロード
                 </button>
-              </div>
-              <div className="text-xs text-center mt-1">
-                画像 {index + 1}
               </div>
             </div>
           ))}
