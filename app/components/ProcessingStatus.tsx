@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react';
 
-export default function ProcessingStatus() {
+interface Props {
+  onComplete?: () => void;
+}
+
+export default function ProcessingStatus({ onComplete }: Props) {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -28,13 +32,13 @@ export default function ProcessingStatus() {
   useEffect(() => {
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 85) return prev; // 85%で停止
+        if (prev >= 90) return prev; // 90%で停止
         
         const increment = Math.random() * 2.5 + 0.8;
-        const newProgress = Math.min(prev + increment, 85);
+        const newProgress = Math.min(prev + increment, 90);
         
         // ステップ更新（最後のステップまで進まないように調整）
-        const stepProgress = (newProgress / 85) * (steps.length - 1);
+        const stepProgress = (newProgress / 90) * (steps.length - 1);
         const newStep = Math.floor(stepProgress);
         setCurrentStep(Math.min(newStep, steps.length - 2)); // 最後から2番目まで
         
@@ -44,6 +48,22 @@ export default function ProcessingStatus() {
 
     return () => clearInterval(progressInterval);
   }, [steps.length]);
+
+  // 外部から完了を制御するための関数
+  const completeProcessing = () => {
+    setProgress(100);
+    setCurrentStep(steps.length - 1);
+    setTimeout(() => {
+      onComplete && onComplete();
+    }, 1000); // 1秒後に完了コールバックを実行
+  };
+
+  // プロップスを外部に公開（useImperativeHandleの代替）
+  useEffect(() => {
+    if (window) {
+      (window as any).completeProcessing = completeProcessing;
+    }
+  }, [onComplete]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

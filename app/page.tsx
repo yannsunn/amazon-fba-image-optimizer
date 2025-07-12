@@ -41,11 +41,20 @@ export default function Home() {
         throw new Error(data.message || data.error);
       }
       
-      setBatchInfo(data);
+      // APIレスポンス受信後、ProcessingStatusに完了を通知
+      if (window && (window as any).completeProcessing) {
+        (window as any).completeProcessing();
+      }
+      
+      // 少し遅延してからダウンロード画面を表示
+      setTimeout(() => {
+        setBatchInfo(data);
+        setProcessing(false);
+      }, 2000);
+      
     } catch (error) {
       console.error('処理エラー:', error);
       setError(error instanceof Error ? error.message : '処理中にエラーが発生しました');
-    } finally {
       setProcessing(false);
     }
   };
@@ -116,7 +125,14 @@ export default function Home() {
         <ImageUploader onUpload={handleUpload} disabled={processing} />
       )}
       
-      {processing && <ProcessingStatus />}
+      {processing && (
+        <ProcessingStatus 
+          onComplete={() => {
+            // ProcessingStatusから完了通知を受け取ったときの処理
+            console.log('Processing completed!');
+          }}
+        />
+      )}
       
       {batchInfo && !processing && (
         <DownloadManager 
