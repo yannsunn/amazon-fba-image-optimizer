@@ -18,6 +18,7 @@ interface Props {
 export default function DownloadManager({ batchInfo, onReset }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadingIndividual, setDownloadingIndividual] = useState(false);
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -57,15 +58,49 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
 
   const handleIndividualDownload = async (imageUrl: string, index: number) => {
     try {
+      // Cloudinary URLから適切なファイル形式を取得
+      const urlParts = imageUrl.split('.');
+      const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
+      
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error('画像の取得に失敗しました');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
       const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = `optimized-image-${index + 1}.jpg`;
-      link.target = '_blank';
+      link.href = url;
+      link.download = `Amazon最適化画像_${index + 1}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // メモリを解放
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('個別ダウンロードエラー:', error);
+      setDownloadError(`画像 ${index + 1} のダウンロードに失敗しました`);
+    }
+  };
+
+  const handleDownloadAllIndividually = async () => {
+    if (!batchInfo.image_urls || batchInfo.image_urls.length === 0) return;
+    
+    setDownloadingIndividual(true);
+    setDownloadError(null);
+    
+    try {
+      // 各画像を順次ダウンロード（短い間隔で）
+      for (let i = 0; i < batchInfo.image_urls.length; i++) {
+        await handleIndividualDownload(batchInfo.image_urls[i], i);
+        // ブラウザの負荷を軽減するため少し待機
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    } catch (error) {
+      console.error('一括個別ダウンロードエラー:', error);
+      setDownloadError('一部の画像のダウンロードに失敗しました');
+    } finally {
+      setDownloadingIndividual(false);
     }
   };
 
@@ -165,23 +200,33 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
             </button>
           </div>
 
-          {/* 個別ダウンロード（選択） */}
+          {/* 個別ダウンロード（一括自動） */}
           <div className="p-4 border rounded-lg bg-gradient-to-br from-green-50 to-green-100">
-            <h4 className="font-semibold text-green-700 mb-2">🖼️ 個別ダウンロード</h4>
+            <h4 className="font-semibold text-green-700 mb-2">🖼️ 個別ファイルダウンロード</h4>
             <p className="text-sm text-gray-600 mb-3">
-              画像を個別に選んでダウンロード
+              画像を個別ファイルとして一括自動ダウンロード
             </p>
             <button
-              onClick={() => {
-                const element = document.getElementById('individual-downloads');
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+              onClick={handleDownloadAllIndividually}
+              disabled={downloadingIndividual}
+              className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              個別に選択
+              {downloadingIndividual ? (
+                <>
+                  <svg className="inline animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  ダウンロード中...
+                </>
+              ) : (
+                <>
+                  <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8" />
+                  </svg>
+                  個別ファイルで一括取得
+                </>
+              )}
             </button>
           </div>
         </div>

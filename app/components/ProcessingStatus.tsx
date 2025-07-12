@@ -28,18 +28,19 @@ export default function ProcessingStatus() {
   useEffect(() => {
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 95) return prev;
+        if (prev >= 85) return prev; // 85%で停止
         
-        const increment = Math.random() * 3 + 1;
-        const newProgress = Math.min(prev + increment, 95);
+        const increment = Math.random() * 2.5 + 0.8;
+        const newProgress = Math.min(prev + increment, 85);
         
-        // ステップ更新
-        const newStep = Math.floor(newProgress / 15);
-        setCurrentStep(Math.min(newStep, steps.length - 1));
+        // ステップ更新（最後のステップまで進まないように調整）
+        const stepProgress = (newProgress / 85) * (steps.length - 1);
+        const newStep = Math.floor(stepProgress);
+        setCurrentStep(Math.min(newStep, steps.length - 2)); // 最後から2番目まで
         
         return newProgress;
       });
-    }, 800);
+    }, 900);
 
     return () => clearInterval(progressInterval);
   }, [steps.length]);
