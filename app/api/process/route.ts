@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
     const batchId = Date.now().toString();
     
     // 画像URLのリストを作成
-    const imageUrls = results.map(result => result.url);
+    const imageUrls = results.map(result => result.optimizedUrl);
     
     return NextResponse.json({
       batch_id: batchId,
