@@ -8,13 +8,7 @@ function getCloudinaryConfig() {
   const api_key = process.env.CLOUDINARY_API_KEY;
   const api_secret = process.env.CLOUDINARY_API_SECRET;
   
-  console.log('Cloudinary config check:', {
-    cloud_name_exists: !!cloud_name,
-    api_key_exists: !!api_key,
-    api_secret_exists: !!api_secret,
-    cloud_name_length: cloud_name?.length || 0,
-    api_key_length: api_key?.length || 0,
-  });
+  // 本番環境では認証情報をログに出力しない
   
   // 設定が有効か確認
   if (!cloud_name || !api_key || !api_secret) {
@@ -165,6 +159,11 @@ export async function uploadAndOptimizeImage(
   }
   
   return new Promise<UploadResult>((resolve, reject) => {
+    // タイムアウト設定（30秒）
+    const timeout = setTimeout(() => {
+      reject(new Error('アップロードがタイムアウトしました（30秒）'));
+    }, 30000);
+
     const uploadOptions = {
       public_id: `amazon-fba/${filename}`,
       resource_type: 'image' as const,
@@ -211,8 +210,10 @@ export async function uploadAndOptimizeImage(
     const stream = cloudinary.uploader.upload_stream(
       uploadOptions,
       (error, result) => {
+        clearTimeout(timeout); // タイムアウトをクリア
+        
         if (error) {
-          reject(error);
+          reject(new Error(`画像アップロードエラー: ${error.message}`));
         } else if (result) {
           resolve({
             url: result.secure_url,

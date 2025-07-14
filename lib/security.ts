@@ -9,7 +9,10 @@ export const SECURITY_CONFIG = {
   maxConcurrentUploads: parseInt(process.env.MAX_CONCURRENT_UPLOADS || '5'),
   rateLimitPerMinute: parseInt(process.env.RATE_LIMIT_PER_MINUTE || '60'),
   allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-  allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || ['http://localhost:3000'],
+  allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || [
+    'http://localhost:3000',
+    'https://amazon-fba-image-optimizer.vercel.app'
+  ],
 };
 
 // ファイルサイズ検証
@@ -84,7 +87,7 @@ export function getSecurityHeaders() {
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Content-Security-Policy': "default-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
+    'Content-Security-Policy': "default-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';",
   };
 }
 

@@ -99,9 +99,9 @@ export async function POST(request: NextRequest) {
         const filename = `${Date.now()}_${index}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
         const result = await uploadAndOptimizeImage(buffer, filename, {
-          width: 1500,
-          height: 1500,
-          quality: 'auto:best',
+          width: 2000,
+          height: 2000,
+          quality: '95',
         });
         
         return {

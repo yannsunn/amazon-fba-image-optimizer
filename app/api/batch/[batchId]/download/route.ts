@@ -18,6 +18,14 @@ export async function GET(
         { status: 400, headers: getSecurityHeaders() }
       );
     }
+
+    // メモリ保護：最大画像数制限
+    if (imageUrls.length > 20) {
+      return NextResponse.json(
+        { error: '一度にダウンロードできる画像は最大20枚までです' },
+        { status: 413, headers: getSecurityHeaders() }
+      );
+    }
     
     // ZIPファイルを作成
     const zip = new JSZip();
@@ -25,7 +33,15 @@ export async function GET(
     // 各画像をダウンロードしてZIPに追加
     for (let i = 0; i < imageUrls.length; i++) {
       try {
-        const response = await fetch(imageUrls[i]);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
+        
+        const response = await fetch(imageUrls[i], { 
+          signal: controller.signal,
+          headers: { 'User-Agent': 'Amazon-FBA-Optimizer/1.0' }
+        });
+        clearTimeout(timeoutId);
+        
         if (!response.ok) continue;
         
         const arrayBuffer = await response.arrayBuffer();

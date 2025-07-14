@@ -60,8 +60,15 @@ export default function ProcessingStatus({ onComplete }: Props) {
 
   // プロップスを外部に公開（useImperativeHandleの代替）
   useEffect(() => {
-    if (window) {
+    if (typeof window !== 'undefined') {
       (window as any).completeProcessing = completeProcessing;
+      
+      // クリーンアップ
+      return () => {
+        if (typeof window !== 'undefined') {
+          delete (window as any).completeProcessing;
+        }
+      };
     }
   }, [onComplete]);
 
