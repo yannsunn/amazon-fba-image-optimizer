@@ -172,8 +172,9 @@ export async function uploadAndOptimizeImage(
           // Amazon FBA要件: 2000x2000px
           width: 2000,
           height: 2000,
-          crop: 'fill', // 2000x2000にフィットするようにリサイズ
-          gravity: 'center', // 中央を基準にクロップ
+          crop: 'pad', // 画像比率を保持し、余白で2000x2000に調整
+          gravity: 'center', // 中央配置
+          background: 'white', // 余白部分を白色に設定
           quality: 95, // 高品質（95%）
           format: 'jpg', // JPEG形式で統一
           flags: ['progressive'], // プログレッシブJPEG
@@ -188,8 +189,9 @@ export async function uploadAndOptimizeImage(
         { 
           width: 2000, 
           height: 2000, 
-          crop: 'fill', 
+          crop: 'pad', 
           gravity: 'center',
+          background: 'white',
           quality: 95,
           format: 'jpg',
           flags: ['progressive'],
@@ -199,8 +201,9 @@ export async function uploadAndOptimizeImage(
         { 
           width: 1000, 
           height: 1000, 
-          crop: 'fill', 
+          crop: 'pad', 
           gravity: 'center',
+          background: 'white',
           quality: 90,
           format: 'jpg',
         },  // サムネイル（1000x1000）
