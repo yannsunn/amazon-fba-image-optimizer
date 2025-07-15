@@ -25,9 +25,14 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
     setDownloadError(null);
     
     try {
-      // 画像URLをクエリパラメータとして渡す
-      const urls = batchInfo.image_urls.join(',');
-      const response = await fetch(`/api/batch/${batchInfo.batch_id}/download?urls=${encodeURIComponent(urls)}`);
+      // 画像URLをPOSTボディで送信
+      const response = await fetch(`/api/batch/${batchInfo.batch_id}/download`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ urls: batchInfo.image_urls }),
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -62,7 +67,14 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
       const urlParts = imageUrl.split('.');
       const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
       
-      const response = await fetch(imageUrl);
+      // プロキシAPIを使用して画像を取得
+      const response = await fetch('/api/proxy/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: imageUrl }),
+      });
       if (!response.ok) throw new Error('画像の取得に失敗しました');
       
       const blob = await response.blob();

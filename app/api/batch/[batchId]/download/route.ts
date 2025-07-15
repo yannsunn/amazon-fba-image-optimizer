@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';
 import { getSecurityHeaders } from '@/lib/security';
 
-export async function GET(
+export async function POST(
   request: NextRequest,
   { params }: { params: { batchId: string } }
 ) {
   try {
     const { batchId } = params;
     
-    // URLからバッチ情報を取得（実際の実装では、データベースやキャッシュから取得）
-    const imageUrls = request.nextUrl.searchParams.get('urls')?.split(',') || [];
+    // POSTボディからバッチ情報を取得
+    const body = await request.json();
+    const imageUrls = body.urls || [];
     
     if (imageUrls.length === 0) {
       return NextResponse.json(
