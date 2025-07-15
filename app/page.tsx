@@ -65,37 +65,37 @@ export default function Home() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
           Amazon FBA商品画像の品質向上
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
           AI技術を使用して画像を2000x2000pxに最適化し、
           Amazon FBAの要件に適合した高品質な商品画像を作成します。
         </p>
       </div>
 
       {/* 機能説明 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="card text-center">
-          <div className="text-4xl mb-4">🎯</div>
-          <h3 className="text-lg font-semibold mb-2">AI画像強化</h3>
-          <p className="text-sm text-gray-600">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="card text-center group">
+          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">🎯</div>
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">AI画像強化</h3>
+          <p className="text-gray-600 leading-relaxed">
             Cloudinary AIで画質を自動最適化
           </p>
         </div>
-        <div className="card text-center">
-          <div className="text-4xl mb-4">📐</div>
-          <h3 className="text-lg font-semibold mb-2">自動リサイズ</h3>
-          <p className="text-sm text-gray-600">
+        <div className="card text-center group">
+          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">📐</div>
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">自動リサイズ</h3>
+          <p className="text-gray-600 leading-relaxed">
             Amazon推奨サイズに自動調整
           </p>
         </div>
-        <div className="card text-center">
-          <div className="text-4xl mb-4">💾</div>
-          <h3 className="text-lg font-semibold mb-2">無料枠管理</h3>
-          <p className="text-sm text-gray-600">
+        <div className="card text-center group">
+          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">💾</div>
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">無料枠管理</h3>
+          <p className="text-gray-600 leading-relaxed">
             月25,000回の変換まで無料
           </p>
         </div>
@@ -103,17 +103,17 @@ export default function Home() {
 
       {/* エラー表示 */}
       {error && (
-        <div className="card bg-error-50 border-error-200">
+        <div className="card bg-error-50 border-error-200 animate-slide-up">
           <div className="flex items-center">
-            <div className="text-error-500 mr-3">⚠️</div>
-            <div>
-              <h3 className="text-lg font-semibold text-error-700">エラー</h3>
-              <p className="text-error-600">{error}</p>
+            <div className="text-error-500 mr-4 text-2xl">⚠️</div>
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold text-error-700 mb-2">エラー</h3>
+              <p className="text-error-600 leading-relaxed">{error}</p>
             </div>
           </div>
           <button 
             onClick={handleReset}
-            className="mt-4 text-sm text-error-600 hover:text-error-700 underline"
+            className="mt-6 px-6 py-2 bg-error-500 text-white rounded-lg hover:bg-error-600 transition-colors duration-200 font-medium"
           >
             やり直す
           </button>
@@ -143,12 +143,24 @@ export default function Home() {
 
       {/* 使用方法 */}
       <div className="card">
-        <h3 className="text-xl font-semibold mb-4">使用方法</h3>
-        <ol className="list-decimal list-inside space-y-2 text-gray-700">
-          <li>最大8枚までの画像を選択またはドラッグ＆ドロップ</li>
-          <li>「処理開始」ボタンをクリックして自動処理を開始</li>
-          <li>処理完了後、最適化された画像をダウンロード</li>
-          <li>Amazon FBAにアップロードして商品ページを更新</li>
+        <h3 className="text-2xl font-semibold mb-6 text-gray-800">使用方法</h3>
+        <ol className="space-y-4">
+          <li className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+            <span className="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-semibold text-sm">1</span>
+            <span className="text-gray-700 leading-relaxed">最大8枚までの画像を選択またはドラッグ＆ドロップ</span>
+          </li>
+          <li className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+            <span className="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-semibold text-sm">2</span>
+            <span className="text-gray-700 leading-relaxed">「処理開始」ボタンをクリックして自動処理を開始</span>
+          </li>
+          <li className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+            <span className="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-semibold text-sm">3</span>
+            <span className="text-gray-700 leading-relaxed">処理完了後、最適化された画像をダウンロード</span>
+          </li>
+          <li className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+            <span className="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-semibold text-sm">4</span>
+            <span className="text-gray-700 leading-relaxed">Amazon FBAにアップロードして商品ページを更新</span>
+          </li>
         </ol>
       </div>
     </div>
