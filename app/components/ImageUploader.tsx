@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import imageCompression from 'browser-image-compression';
 
 interface Props {
   onUpload: (files: File[]) => void;
@@ -11,6 +12,7 @@ interface Props {
 export default function ImageUploader({ onUpload, disabled }: Props) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   // コンポーネントアンマウント時のメモリクリーンアップ
   useEffect(() => {
@@ -55,9 +57,42 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
     setPreviews(newPreviews);
   };
 
-  const handleUpload = () => {
+  const compressImage = async (file: File): Promise<File> => {
+    const options = {
+      maxSizeMB: 1, // 1MB以下に圧縮
+      maxWidthOrHeight: 1920, // 最大解像度
+      useWebWorker: true,
+      fileType: 'image/jpeg' as const,
+      quality: 0.8, // 品質80%
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.warn('Image compression failed, using original:', error);
+      return file;
+    }
+  };
+
+  const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
-    onUpload(selectedFiles);
+    
+    setIsCompressing(true);
+    try {
+      // 各画像を圧縮
+      const compressedFiles = await Promise.all(
+        selectedFiles.map(file => compressImage(file))
+      );
+      
+      onUpload(compressedFiles);
+    } catch (error) {
+      console.error('Compression error:', error);
+      // 圧縮に失敗した場合は元のファイルを使用
+      onUpload(selectedFiles);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   return (
@@ -132,12 +167,14 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
           {/* アップロードボタン */}
           <button
             onClick={handleUpload}
-            disabled={disabled || selectedFiles.length === 0}
+            disabled={disabled || selectedFiles.length === 0 || isCompressing}
             className="btn-primary w-full"
           >
-            {disabled 
-              ? '処理中...' 
-              : `${selectedFiles.length}枚の画像を処理開始`
+            {isCompressing 
+              ? '画像を圧縮中...' 
+              : disabled 
+                ? '処理中...' 
+                : `${selectedFiles.length}枚の画像を処理開始`
             }
           </button>
         </div>
@@ -151,6 +188,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
         <ul className="text-sm text-warning-600 space-y-1">
           <li>• 対応形式: JPEG, PNG</li>
           <li>• 最大8枚まで同時処理可能</li>
+          <li>• 自動圧縮: アップロード前に1MB以下に圧縮</li>
           <li>• 処理時間: 1枚あたり約30秒〜1分</li>
           <li>• 出力: 2000x2000px、10MB以下のJPEG</li>
         </ul>

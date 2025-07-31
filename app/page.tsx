@@ -22,23 +22,67 @@ export default function Home() {
     setProcessing(true);
     setError(null);
     
-    const formData = new FormData();
-    files.forEach(file => formData.append('images', file));
-    
     try {
-      const response = await fetch('/api/process', {
-        method: 'POST',
-        body: formData,
-      });
+      // 各ファイルを個別にアップロード（分割アップロード）
+      const results = [];
+      const errors = [];
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || data.error || `エラーが発生しました (${response.status})`);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('images', file);
+        
+        try {
+          const response = await fetch('/api/process', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Batch-Index': i.toString(),
+              'X-Batch-Total': files.length.toString(),
+            },
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || data.error || `エラーが発生しました (${response.status})`);
+          }
+          
+          if (data.error) {
+            throw new Error(data.message || data.error);
+          }
+          
+          // 個別結果を保存
+          if (data.results && data.results.length > 0) {
+            results.push(...data.results);
+          }
+          
+        } catch (error) {
+          console.error(`File ${i + 1} processing error:`, error);
+          errors.push({
+            fileName: file.name,
+            error: error instanceof Error ? error.message : '処理中にエラーが発生しました'
+          });
+        }
       }
       
-      if (data.error) {
-        throw new Error(data.message || data.error);
+      // 全体的な結果を作成
+      const batchId = Date.now().toString();
+      const batchData = {
+        batch_id: batchId,
+        total_images: files.length,
+        processed_at: new Date().toISOString(),
+        image_urls: results.map(result => result.optimizedUrl),
+        status: 'completed',
+        processed: results.length,
+        failed: errors.length,
+        results,
+        errors,
+        message: results.length > 0 ? `${results.length}枚の画像を最適化しました。` : '画像の処理に失敗しました。',
+      };
+      
+      if (results.length === 0 && errors.length > 0) {
+        throw new Error(`すべての画像の処理に失敗しました: ${errors[0].error}`);
       }
       
       // APIレスポンス受信後、ProcessingStatusに完了を通知
@@ -48,7 +92,7 @@ export default function Home() {
       
       // 少し遅延してからダウンロード画面を表示
       setTimeout(() => {
-        setBatchInfo(data);
+        setBatchInfo(batchData);
         setProcessing(false);
       }, 2000);
       
