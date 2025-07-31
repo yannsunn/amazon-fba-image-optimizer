@@ -5,8 +5,32 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Amazon FBA Image Optimizer',
-  description: 'AI-powered image enhancement for Amazon FBA listings',
+  title: 'Amazon FBA画像品質向上ツール | AI画像最適化サービス',
+  description: 'AI技術でAmazon FBA商品画像を2000x2000pxに最適化。無料で最大8枚まで同時処理可能。画質向上・リサイズ・圧縮を自動実行し、売上向上をサポートします。',
+  keywords: 'Amazon FBA, 画像最適化, AI画像処理, 商品画像, 画質向上, リサイズ, 2000x2000',
+  authors: [{ name: 'Amazon FBA Image Optimizer' }],
+  robots: 'index, follow',
+  metadataBase: new URL('https://amazon-image.awakeinc.co.jp'),
+  openGraph: {
+    type: 'website',
+    locale: 'ja_JP',
+    url: 'https://amazon-image.awakeinc.co.jp',
+    title: 'Amazon FBA画像品質向上ツール',
+    description: 'AI技術でAmazon FBA商品画像を2000x2000pxに最適化。無料で最大8枚まで同時処理可能。',
+    siteName: 'Amazon FBA Image Optimizer',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Amazon FBA画像品質向上ツール',
+    description: 'AI技術でAmazon FBA商品画像を最適化',
+  },
+}
+
+export function generateViewport() {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+  }
 }
 
 export default function RootLayout({

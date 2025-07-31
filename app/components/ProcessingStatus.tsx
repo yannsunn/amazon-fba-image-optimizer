@@ -165,7 +165,7 @@ export default function ProcessingStatus({ onComplete }: Props) {
       {/* 注意事項 */}
       <div className="mt-4 p-4 bg-warning-50 border border-warning-200 rounded-lg">
         <p className="text-sm text-warning-700">
-          💡 処理中はブラウザを閉じないでください。
+          <span role="img" aria-label="電球">💡</span> 処理中はブラウザを閉じないでください。
           処理が完了するまでお待ちください。
         </p>
       </div>

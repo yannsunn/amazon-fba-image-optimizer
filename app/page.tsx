@@ -123,21 +123,21 @@ export default function Home() {
       {/* 機能説明 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="card text-center group">
-          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">🎯</div>
+          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300" role="img" aria-label="ターゲット - AI画像強化">🎯</div>
           <h3 className="text-xl font-semibold mb-3 text-gray-800">AI画像強化</h3>
           <p className="text-gray-600 leading-relaxed">
             Cloudinary AIで画質を自動最適化
           </p>
         </div>
         <div className="card text-center group">
-          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">📐</div>
+          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300" role="img" aria-label="定規 - 自動リサイズ">📐</div>
           <h3 className="text-xl font-semibold mb-3 text-gray-800">自動リサイズ</h3>
           <p className="text-gray-600 leading-relaxed">
             Amazon推奨サイズに自動調整
           </p>
         </div>
         <div className="card text-center group">
-          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">💾</div>
+          <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300" role="img" aria-label="フロッピーディスク - 無料枠管理">💾</div>
           <h3 className="text-xl font-semibold mb-3 text-gray-800">無料枠管理</h3>
           <p className="text-gray-600 leading-relaxed">
             月25,000回の変換まで無料
@@ -149,7 +149,7 @@ export default function Home() {
       {error && (
         <div className="card bg-error-50 border-error-200 animate-slide-up">
           <div className="flex items-center">
-            <div className="text-error-500 mr-4 text-2xl">⚠️</div>
+            <div className="text-error-500 mr-4 text-2xl" role="img" aria-label="警告">⚠️</div>
             <div className="flex-1">
               <h3 className="text-xl font-semibold text-error-700 mb-2">エラー</h3>
               <p className="text-error-600 leading-relaxed">{error}</p>
@@ -206,6 +206,41 @@ export default function Home() {
             <span className="text-gray-700 leading-relaxed">Amazon FBAにアップロードして商品ページを更新</span>
           </li>
         </ol>
+      </div>
+
+      {/* プライバシー・セキュリティ情報 */}
+      <div className="card bg-blue-50 border-blue-200">
+        <h3 className="text-2xl font-semibold mb-6 text-blue-800">
+          <span role="img" aria-label="盾">🛡️</span> プライバシー・セキュリティ
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-blue-700 mb-3">データ保護</h4>
+            <ul className="text-sm text-blue-600 space-y-2">
+              <li>• アップロードされた画像は処理後に自動削除</li>
+              <li>• 個人情報は一切収集・保存しません</li>
+              <li>• HTTPS通信で暗号化されたデータ転送</li>
+              <li>• ログイン不要、アカウント登録不要</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-blue-700 mb-3">技術仕様</h4>
+            <ul className="text-sm text-blue-600 space-y-2">
+              <li>• Cloudinary AI技術による画像処理</li>
+              <li>• 月25,000回の無料変換枠</li>
+              <li>• レート制限による適正利用の確保</li>
+              <li>• セキュリティヘッダーによる保護</li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-6 p-4 bg-blue-100 rounded-lg">
+          <p className="text-sm text-blue-700">
+            <span role="img" aria-label="情報">ℹ️</span>
+            <strong>免責事項:</strong> 本サービスはAmazon FBA商品画像の最適化を目的としており、
+            処理結果の品質や商品販売への効果を保証するものではありません。
+            重要な商品画像は事前にバックアップを取ることをお勧めします。
+          </p>
+        </div>
       </div>
     </div>
   );

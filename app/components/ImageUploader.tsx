@@ -104,7 +104,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
       >
         <input {...getInputProps()} />
         <div className="space-y-4">
-          <div className="text-6xl">📸</div>
+          <div className="text-6xl" role="img" aria-label="カメラ - 画像アップロード">📸</div>
           {isDragActive ? (
             <p className="text-lg text-primary-600">
               ここに画像をドロップしてください
@@ -183,7 +183,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
       {/* 注意事項 */}
       <div className="card bg-warning-50 border-warning-200">
         <h3 className="text-lg font-semibold text-warning-700 mb-2">
-          📋 処理について
+          <span role="img" aria-label="クリップボード">📋</span> 処理について
         </h3>
         <ul className="text-sm text-warning-600 space-y-1">
           <li>• 対応形式: JPEG, PNG</li>

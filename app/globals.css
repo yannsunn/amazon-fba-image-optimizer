@@ -35,6 +35,12 @@ body {
          backdrop-blur-sm bg-white/60 shadow-lg hover:shadow-xl;
 }
 
+@media (max-width: 768px) {
+  .upload-area {
+    @apply p-6;
+  }
+}
+
 .upload-area.dragover {
   @apply border-primary-500 bg-primary-100/70 shadow-2xl scale-[1.02];
 }
@@ -58,6 +64,12 @@ body {
 .card {
   @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-gray-200/50 
          hover:shadow-2xl transition-all duration-300 hover:scale-[1.01];
+}
+
+@media (max-width: 768px) {
+  .card {
+    @apply p-6 rounded-xl;
+  }
 }
 
 .progress-bar {
