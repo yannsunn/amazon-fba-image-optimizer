@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface BatchInfo {
   batch_id: string;
@@ -258,10 +259,13 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
           {batchInfo.image_urls && batchInfo.image_urls.map((url, index) => (
             <div key={index} className="space-y-2">
               <div className="relative group cursor-pointer" onClick={() => handleIndividualDownload(url, index)}>
-                <img
+                <Image
                   src={url}
                   alt={`Optimized ${index + 1}`}
+                  width={200}
+                  height={160}
                   className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-colors"
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-opacity rounded-lg flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity">

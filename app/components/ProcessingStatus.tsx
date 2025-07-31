@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Props {
   onComplete?: () => void;
@@ -50,13 +50,13 @@ export default function ProcessingStatus({ onComplete }: Props) {
   }, [steps.length]);
 
   // 外部から完了を制御するための関数
-  const completeProcessing = () => {
+  const completeProcessing = useCallback(() => {
     setProgress(100);
     setCurrentStep(steps.length - 1);
     setTimeout(() => {
       onComplete && onComplete();
     }, 1000); // 1秒後に完了コールバックを実行
-  };
+  }, [onComplete, steps.length]);
 
   // プロップスを外部に公開（useImperativeHandleの代替）
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function ProcessingStatus({ onComplete }: Props) {
         }
       };
     }
-  }, [onComplete]);
+  }, [completeProcessing, onComplete]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

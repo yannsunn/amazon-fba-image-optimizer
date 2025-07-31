@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
+import Image from 'next/image';
 
 interface Props {
   onUpload: (files: File[]) => void;
@@ -19,7 +20,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
     return () => {
       previews.forEach(url => URL.revokeObjectURL(url));
     };
-  }, []);
+  }, [previews]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 8) {
@@ -133,10 +134,13 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {previews.map((url, idx) => (
               <div key={idx} className="relative group">
-                <img
+                <Image
                   src={url}
                   alt={`Preview ${idx + 1}`}
+                  width={128}
+                  height={128}
                   className="w-full h-32 object-cover rounded border"
+                  unoptimized
                 />
                 <button
                   onClick={() => removeFile(idx)}
