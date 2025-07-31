@@ -13,6 +13,12 @@ const nextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+    responseLimit: false,
+  },
   headers: async () => [
     {
       source: '/:path*',

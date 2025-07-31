@@ -5,7 +5,12 @@
   "framework": "nextjs",
   "functions": {
     "app/api/process/route.ts": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "memory": 1024
     }
+  },
+  "env": {
+    "MAX_FILE_SIZE_MB": "10",
+    "MAX_CONCURRENT_UPLOADS": "8"
   }
 }

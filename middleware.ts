@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
       if (origin && validateOrigin(origin)) {
         response.headers.set('Access-Control-Allow-Origin', origin);
         response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length');
         response.headers.set('Access-Control-Max-Age', '86400');
       }
       
