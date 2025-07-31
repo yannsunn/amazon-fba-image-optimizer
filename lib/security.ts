@@ -6,7 +6,7 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 // セキュリティ設定
 export const SECURITY_CONFIG = {
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE_MB || '10') * 1024 * 1024, // MB to bytes
-  maxConcurrentUploads: parseInt(process.env.MAX_CONCURRENT_UPLOADS || '5'),
+  maxConcurrentUploads: parseInt(process.env.MAX_CONCURRENT_UPLOADS || '8'),
   rateLimitPerMinute: parseInt(process.env.RATE_LIMIT_PER_MINUTE || '60'),
   allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || [

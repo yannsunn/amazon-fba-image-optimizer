@@ -8,6 +8,11 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   swcMinify: true,
   reactStrictMode: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
   headers: async () => [
     {
       source: '/:path*',

@@ -9,6 +9,9 @@ import {
   getSecurityHeaders,
 } from '@/lib/security';
 
+export const runtime = 'nodejs';
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     // レート制限チェック
