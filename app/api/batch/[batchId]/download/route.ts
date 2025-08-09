@@ -12,6 +12,7 @@ export async function POST(
     // POSTボディからバッチ情報を取得
     const body = await request.json();
     const imageUrls = body.urls || [];
+    const results = body.results || [];
     
     if (imageUrls.length === 0) {
       return NextResponse.json(
@@ -48,9 +49,25 @@ export async function POST(
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         
-        // ファイル名を生成（拡張子を保持）
+        // resultsからサイズ情報を取得
+        let sizeInfo = '';
+        let originalName = '';
+        if (results && results[i]) {
+          const result = results[i];
+          if (result.outputSize) {
+            sizeInfo = `_${result.outputSize}`;
+          }
+          if (result.originalName) {
+            // 元のファイル名から拡張子を除いた部分を取得
+            originalName = result.originalName.replace(/\.[^/.]+$/, '');
+          }
+        }
+        
+        // ファイル名を生成（元のファイル名_サイズ.拡張子）
         const extension = imageUrls[i].split('.').pop()?.split('?')[0] || 'jpg';
-        const filename = `optimized_${i + 1}.${extension}`;
+        const filename = originalName 
+          ? `${originalName}${sizeInfo}.${extension}`
+          : `optimized_${i + 1}${sizeInfo}.${extension}`;
         
         zip.file(filename, buffer);
       } catch (error) {

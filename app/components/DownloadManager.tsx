@@ -35,13 +35,16 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
     setDownloadError(null);
     
     try {
-      // 画像URLをPOSTボディで送信
+      // 画像URLとresults情報をPOSTボディで送信
       const response = await fetch(`/api/batch/${batchInfo.batch_id}/download`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ urls: batchInfo.image_urls }),
+        body: JSON.stringify({ 
+          urls: batchInfo.image_urls,
+          results: batchInfo.results 
+        }),
       });
       
       if (!response.ok) {
