@@ -164,18 +164,23 @@ export async function uploadAndOptimizeImage(
       reject(new Error('アップロードがタイムアウトしました（30秒）'));
     }, 30000);
 
+    // デフォルトサイズまたは指定されたサイズを使用
+    const targetWidth = options.width || 2000;
+    const targetHeight = options.height || 2000;
+    const quality = parseInt(options.quality || '95');
+    
     const uploadOptions = {
       public_id: `amazon-fba/${filename}`,
       resource_type: 'image' as const,
       transformation: [
         {
-          // Amazon FBA要件: 2000x2000px
-          width: 2000,
-          height: 2000,
-          crop: 'pad', // 画像比率を保持し、余白で2000x2000に調整
+          // 指定されたサイズに最適化
+          width: targetWidth,
+          height: targetHeight,
+          crop: 'pad', // 画像比率を保持し、余白で指定サイズに調整
           gravity: 'center', // 中央配置
           background: 'white', // 余白部分を白色に設定
-          quality: 95, // 高品質（95%）
+          quality: quality, // 高品質
           format: 'jpg', // JPEG形式で統一
           flags: ['progressive'], // プログレッシブJPEG
           // AI画質向上
@@ -184,29 +189,29 @@ export async function uploadAndOptimizeImage(
           enhance: true,
         },
       ],
-      // Amazon商品画像用の最適化バリエーション
+      // バリエーション作成
       eager: [
         { 
-          width: 2000, 
-          height: 2000, 
+          width: targetWidth, 
+          height: targetHeight, 
           crop: 'pad', 
           gravity: 'center',
           background: 'white',
-          quality: 95,
+          quality: quality,
           format: 'jpg',
           flags: ['progressive'],
           effect: 'sharpen:100',
           enhance: true,
-        }, // メイン画像（2000x2000）
+        }, // メイン画像（指定サイズ）
         { 
-          width: 1000, 
-          height: 1000, 
+          width: Math.min(300, targetWidth), 
+          height: Math.min(300, targetHeight), 
           crop: 'pad', 
           gravity: 'center',
           background: 'white',
           quality: 90,
           format: 'jpg',
-        },  // サムネイル（1000x1000）
+        },  // サムネイル（300x300以下）
       ],
     };
     

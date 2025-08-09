@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import Image from 'next/image';
 
 interface Props {
-  onUpload: (files: File[]) => void;
+  onUpload: (files: File[], outputSize: string) => void;
   disabled: boolean;
 }
 
@@ -14,6 +14,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [outputSize, setOutputSize] = useState<string>('2000x2000');
 
   // コンポーネントアンマウント時のメモリクリーンアップ
   useEffect(() => {
@@ -86,11 +87,11 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
         selectedFiles.map(file => compressImage(file))
       );
       
-      onUpload(compressedFiles);
+      onUpload(compressedFiles, outputSize);
     } catch (error) {
       console.error('Compression error:', error);
       // 圧縮に失敗した場合は元のファイルを使用
-      onUpload(selectedFiles);
+      onUpload(selectedFiles, outputSize);
     } finally {
       setIsCompressing(false);
     }
@@ -129,6 +130,74 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
           <h3 className="text-lg font-semibold mb-4">
             選択された画像 ({selectedFiles.length}枚)
           </h3>
+          
+          {/* 出力サイズ選択 */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              出力サイズを選択
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="outputSize"
+                  value="2000x2000"
+                  checked={outputSize === '2000x2000'}
+                  onChange={(e) => setOutputSize(e.target.value)}
+                  className="sr-only"
+                />
+                <div className={`flex-1 ${outputSize === '2000x2000' ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
+                  <div className="text-lg">2000 × 2000 px</div>
+                  <div className="text-sm text-gray-500 mt-1">Amazon FBA標準</div>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 ${outputSize === '2000x2000' ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
+                  {outputSize === '2000x2000' && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
+                </div>
+              </label>
+              
+              <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="outputSize"
+                  value="970x600"
+                  checked={outputSize === '970x600'}
+                  onChange={(e) => setOutputSize(e.target.value)}
+                  className="sr-only"
+                />
+                <div className={`flex-1 ${outputSize === '970x600' ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
+                  <div className="text-lg">970 × 600 px</div>
+                  <div className="text-sm text-gray-500 mt-1">横長レイアウト用</div>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 ${outputSize === '970x600' ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
+                  {outputSize === '970x600' && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
+                </div>
+              </label>
+              
+              <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="outputSize"
+                  value="300x300"
+                  checked={outputSize === '300x300'}
+                  onChange={(e) => setOutputSize(e.target.value)}
+                  className="sr-only"
+                />
+                <div className={`flex-1 ${outputSize === '300x300' ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
+                  <div className="text-lg">300 × 300 px</div>
+                  <div className="text-sm text-gray-500 mt-1">サムネイル用</div>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 ${outputSize === '300x300' ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
+                  {outputSize === '300x300' && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
+                </div>
+              </label>
+            </div>
+          </div>
           
           {/* プレビューグリッド */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -194,7 +263,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
           <li>• 最大8枚まで同時処理可能</li>
           <li>• 自動圧縮: アップロード前に1MB以下に圧縮</li>
           <li>• 処理時間: 1枚あたり約30秒〜1分</li>
-          <li>• 出力: 2000x2000px、10MB以下のJPEG</li>
+          <li>• 出力: 選択可能（2000×2000px / 970×600px / 300×300px）</li>
         </ul>
       </div>
     </div>

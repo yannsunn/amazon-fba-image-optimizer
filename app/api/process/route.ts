@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const files = formData.getAll('images') as File[];
+    const outputSize = formData.get('outputSize') as string || '2000x2000';
     
     if (files.length === 0) {
       return NextResponse.json(
@@ -102,9 +103,12 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `${Date.now()}_${index}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
+        // 出力サイズに応じた設定
+        const [width, height] = outputSize.split('x').map(Number);
+        
         const result = await uploadAndOptimizeImage(buffer, filename, {
-          width: 2000,
-          height: 2000,
+          width,
+          height,
           quality: '95',
         });
         
@@ -118,8 +122,8 @@ export async function POST(request: NextRequest) {
             thumbnailUrl: result.variants.thumbnail,
             size: result.bytes,
             dimensions: {
-              width: 2000, // 固定で2000x2000
-              height: 2000,
+              width,
+              height,
             },
           },
         };
