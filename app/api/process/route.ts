@@ -140,8 +140,8 @@ export async function POST(request: NextRequest) {
           },
           isQuotaError: errorMessage.includes('無料枠の使用量を超えました'),
         };
-      })
-    );
+      }
+    }));
 
     // すべての処理を並列実行
     const processResults = await Promise.allSettled(processPromises);
