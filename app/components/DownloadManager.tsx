@@ -9,6 +9,15 @@ interface BatchInfo {
   processed_at: string;
   image_urls: string[];
   status: string;
+  results?: Array<{
+    originalName: string;
+    outputSize: string;
+    optimizedUrl: string;
+    dimensions: {
+      width: number;
+      height: number;
+    };
+  }>;
 }
 
 interface Props {
@@ -141,19 +150,21 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
             <div className="text-2xl font-bold text-success-700">
               {batchInfo.total_images}
             </div>
-            <div className="text-sm text-success-600">処理枚数</div>
+            <div className="text-sm text-success-600">元画像数</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-success-700">
-              2000×2000
+              {batchInfo.results ? batchInfo.results.length : batchInfo.image_urls.length}
             </div>
-            <div className="text-sm text-success-600">解像度</div>
+            <div className="text-sm text-success-600">生成画像数</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-success-700">
-              ≤10MB
+              {batchInfo.results && batchInfo.results.length > 0
+                ? [...new Set(batchInfo.results.map(r => r.outputSize))].join(', ')
+                : '2000×2000'}
             </div>
-            <div className="text-sm text-success-600">ファイルサイズ</div>
+            <div className="text-sm text-success-600">出力サイズ</div>
           </div>
         </div>
 
@@ -255,38 +266,90 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
           </p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {batchInfo.image_urls && batchInfo.image_urls.map((url, index) => (
-            <div key={index} className="space-y-2">
-              <div className="relative group cursor-pointer" onClick={() => handleIndividualDownload(url, index)}>
-                <Image
-                  src={url}
-                  alt={`Optimized ${index + 1}`}
-                  width={200}
-                  height={160}
-                  className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-colors"
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-opacity rounded-lg flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                    </svg>
-                  </div>
+        {batchInfo.results ? (
+          // 画像をグループ化して表示
+          <div className="space-y-6">
+            {Object.entries(
+              batchInfo.results.reduce((groups, result) => {
+                const name = result.originalName;
+                if (!groups[name]) groups[name] = [];
+                groups[name].push(result);
+                return groups;
+              }, {} as Record<string, typeof batchInfo.results>)
+            ).map(([originalName, results], groupIndex) => (
+              <div key={groupIndex} className="border rounded-lg p-4 bg-gray-50">
+                <h4 className="font-semibold text-gray-700 mb-3">📄 {originalName}</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {results.map((result, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="relative group cursor-pointer" onClick={() => handleIndividualDownload(result.optimizedUrl, groupIndex * 10 + index)}>
+                        <Image
+                          src={result.optimizedUrl}
+                          alt={`${originalName} - ${result.outputSize}`}
+                          width={200}
+                          height={160}
+                          className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-colors"
+                          unoptimized
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-opacity rounded-lg flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-medium text-gray-700">{result.outputSize}</div>
+                        <div className="text-xs text-gray-500">{result.dimensions.width}×{result.dimensions.height}px</div>
+                        <button
+                          onClick={() => handleIndividualDownload(result.optimizedUrl, groupIndex * 10 + index)}
+                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline mt-1"
+                        >
+                          ダウンロード
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-sm font-medium text-gray-700">画像 {index + 1}</div>
-                <button
-                  onClick={() => handleIndividualDownload(url, index)}
-                  className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                  ダウンロード
-                </button>
+            ))}
+          </div>
+        ) : (
+          // フォールバック：単純なリスト表示
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {batchInfo.image_urls && batchInfo.image_urls.map((url, index) => (
+              <div key={index} className="space-y-2">
+                <div className="relative group cursor-pointer" onClick={() => handleIndividualDownload(url, index)}>
+                  <Image
+                    src={url}
+                    alt={`Optimized ${index + 1}`}
+                    width={200}
+                    height={160}
+                    className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-colors"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-opacity rounded-lg flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-medium text-gray-700">画像 {index + 1}</div>
+                  <button
+                    onClick={() => handleIndividualDownload(url, index)}
+                    className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    ダウンロード
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 使用方法 */}

@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const files = formData.getAll('images') as File[];
-    const outputSize = formData.get('outputSize') as string || '2000x2000';
+    const outputSizesStr = formData.get('outputSizes') as string;
+    const outputSizes = outputSizesStr ? JSON.parse(outputSizesStr) : ['2000x2000'];
     
     if (files.length === 0) {
       return NextResponse.json(
@@ -73,8 +74,9 @@ export async function POST(request: NextRequest) {
       console.warn('Cloudinary無料枠が80%を超えています:', usageCheck.usage);
     }
 
-    // 並列処理で画像を最適化
-    const processPromises = files.map(async (file, index) => {
+    // 並列処理で画像を最適化（各画像×各サイズ）
+    const processPromises = files.flatMap((file, fileIndex) => 
+      outputSizes.map(async (outputSize: string, sizeIndex: number) => {
       // ファイルサイズ検証
       const sizeValidation = validateFileSize(file);
       if (!sizeValidation.valid) {
@@ -101,7 +103,7 @@ export async function POST(request: NextRequest) {
       
       try {
         const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = `${Date.now()}_${index}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const filename = `${Date.now()}_${fileIndex}_${sizeIndex}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
         // 出力サイズに応じた設定
         const [width, height] = outputSize.split('x').map(Number);
@@ -116,7 +118,8 @@ export async function POST(request: NextRequest) {
           success: true,
           result: {
             originalName: file.name,
-            // メイン最適化画像（2000x2000 JPG）を使用
+            outputSize: outputSize,
+            // メイン最適化画像（指定サイズのJPG）を使用
             optimizedUrl: result.variants.main || result.url,
             mainImageUrl: result.variants.main,
             thumbnailUrl: result.variants.thumbnail,
@@ -137,8 +140,8 @@ export async function POST(request: NextRequest) {
           },
           isQuotaError: errorMessage.includes('無料枠の使用量を超えました'),
         };
-      }
-    });
+      })
+    );
 
     // すべての処理を並列実行
     const processResults = await Promise.allSettled(processPromises);

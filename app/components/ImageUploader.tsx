@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import Image from 'next/image';
 
 interface Props {
-  onUpload: (files: File[], outputSize: string) => void;
+  onUpload: (files: File[], outputSizes: string[]) => void;
   disabled: boolean;
 }
 
@@ -14,7 +14,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isCompressing, setIsCompressing] = useState(false);
-  const [outputSize, setOutputSize] = useState<string>('2000x2000');
+  const [outputSizes, setOutputSizes] = useState<string[]>(['2000x2000']);
 
   // コンポーネントアンマウント時のメモリクリーンアップ
   useEffect(() => {
@@ -87,11 +87,11 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
         selectedFiles.map(file => compressImage(file))
       );
       
-      onUpload(compressedFiles, outputSize);
+      onUpload(compressedFiles, outputSizes);
     } catch (error) {
       console.error('Compression error:', error);
       // 圧縮に失敗した場合は元のファイルを使用
-      onUpload(selectedFiles, outputSize);
+      onUpload(selectedFiles, outputSizes);
     } finally {
       setIsCompressing(false);
     }
@@ -134,69 +134,93 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
           {/* 出力サイズ選択 */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              出力サイズを選択
+              出力サイズを選択（複数選択可能）
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
                 <input
-                  type="radio"
-                  name="outputSize"
+                  type="checkbox"
                   value="2000x2000"
-                  checked={outputSize === '2000x2000'}
-                  onChange={(e) => setOutputSize(e.target.value)}
+                  checked={outputSizes.includes('2000x2000')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setOutputSizes([...outputSizes, e.target.value]);
+                    } else {
+                      setOutputSizes(outputSizes.filter(size => size !== e.target.value));
+                    }
+                  }}
                   className="sr-only"
                 />
-                <div className={`flex-1 ${outputSize === '2000x2000' ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
+                <div className={`flex-1 ${outputSizes.includes('2000x2000') ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
                   <div className="text-lg">2000 × 2000 px</div>
                   <div className="text-sm text-gray-500 mt-1">Amazon FBA標準</div>
                 </div>
-                <div className={`w-5 h-5 rounded-full border-2 ${outputSize === '2000x2000' ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
-                  {outputSize === '2000x2000' && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
+                <div className={`w-5 h-5 rounded-lg border-2 ${outputSizes.includes('2000x2000') ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
+                  {outputSizes.includes('2000x2000') && (
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
                   )}
                 </div>
               </label>
               
               <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
                 <input
-                  type="radio"
-                  name="outputSize"
+                  type="checkbox"
                   value="970x600"
-                  checked={outputSize === '970x600'}
-                  onChange={(e) => setOutputSize(e.target.value)}
+                  checked={outputSizes.includes('970x600')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setOutputSizes([...outputSizes, e.target.value]);
+                    } else {
+                      setOutputSizes(outputSizes.filter(size => size !== e.target.value));
+                    }
+                  }}
                   className="sr-only"
                 />
-                <div className={`flex-1 ${outputSize === '970x600' ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
+                <div className={`flex-1 ${outputSizes.includes('970x600') ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
                   <div className="text-lg">970 × 600 px</div>
                   <div className="text-sm text-gray-500 mt-1">横長レイアウト用</div>
                 </div>
-                <div className={`w-5 h-5 rounded-full border-2 ${outputSize === '970x600' ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
-                  {outputSize === '970x600' && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
+                <div className={`w-5 h-5 rounded-lg border-2 ${outputSizes.includes('970x600') ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
+                  {outputSizes.includes('970x600') && (
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
                   )}
                 </div>
               </label>
               
               <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
                 <input
-                  type="radio"
-                  name="outputSize"
+                  type="checkbox"
                   value="300x300"
-                  checked={outputSize === '300x300'}
-                  onChange={(e) => setOutputSize(e.target.value)}
+                  checked={outputSizes.includes('300x300')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setOutputSizes([...outputSizes, e.target.value]);
+                    } else {
+                      setOutputSizes(outputSizes.filter(size => size !== e.target.value));
+                    }
+                  }}
                   className="sr-only"
                 />
-                <div className={`flex-1 ${outputSize === '300x300' ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
+                <div className={`flex-1 ${outputSizes.includes('300x300') ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
                   <div className="text-lg">300 × 300 px</div>
                   <div className="text-sm text-gray-500 mt-1">サムネイル用</div>
                 </div>
-                <div className={`w-5 h-5 rounded-full border-2 ${outputSize === '300x300' ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
-                  {outputSize === '300x300' && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
+                <div className={`w-5 h-5 rounded-lg border-2 ${outputSizes.includes('300x300') ? 'border-primary-600 bg-primary-600' : 'border-gray-300'} flex items-center justify-center`}>
+                  {outputSizes.includes('300x300') && (
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
                   )}
                 </div>
               </label>
             </div>
+            {outputSizes.length === 0 && (
+              <p className="text-sm text-error-600 mt-2">※ 少なくとも1つのサイズを選択してください</p>
+            )}
           </div>
           
           {/* プレビューグリッド */}
@@ -240,7 +264,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
           {/* アップロードボタン */}
           <button
             onClick={handleUpload}
-            disabled={disabled || selectedFiles.length === 0 || isCompressing}
+            disabled={disabled || selectedFiles.length === 0 || isCompressing || outputSizes.length === 0}
             className="btn-primary w-full"
           >
             {isCompressing 

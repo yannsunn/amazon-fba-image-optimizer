@@ -18,7 +18,7 @@ export default function Home() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUpload = async (files: File[], outputSize: string = '2000x2000') => {
+  const handleUpload = async (files: File[], outputSizes: string[] = ['2000x2000']) => {
     setProcessing(true);
     setError(null);
     
@@ -31,7 +31,7 @@ export default function Home() {
         const file = files[i];
         const formData = new FormData();
         formData.append('images', file);
-        formData.append('outputSize', outputSize);
+        formData.append('outputSizes', JSON.stringify(outputSizes));
         
         try {
           const response = await fetch('/api/process', {
