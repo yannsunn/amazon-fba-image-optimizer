@@ -87,7 +87,8 @@ export function getSecurityHeaders() {
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Content-Security-Policy': "default-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';",
+    'Content-Security-Policy': "default-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://res.cloudinary.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self';",
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
   };
 }
 

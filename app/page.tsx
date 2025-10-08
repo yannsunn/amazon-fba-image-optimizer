@@ -4,14 +4,10 @@ import { useState } from 'react';
 import ImageUploader from './components/ImageUploader';
 import ProcessingStatus from './components/ProcessingStatus';
 import DownloadManager from './components/DownloadManager';
+import { BatchInfo, ProcessingResult, ProcessingError } from './types/batch';
 
-interface BatchInfo {
-  batch_id: string;
-  total_images: number;
-  processed_at: string;
-  image_urls: string[];
-  status: string;
-}
+// 定数定義
+const PROCESSING_COMPLETE_DELAY_MS = 2000;
 
 export default function Home() {
   const [batchInfo, setBatchInfo] = useState<BatchInfo | null>(null);
@@ -21,11 +17,11 @@ export default function Home() {
   const handleUpload = async (files: File[], outputSizes: string[] = ['2000x2000']) => {
     setProcessing(true);
     setError(null);
-    
+
     try {
       // 各ファイルを個別にアップロード（分割アップロード）
-      const results = [];
-      const errors = [];
+      const results: ProcessingResult[] = [];
+      const errors: ProcessingError[] = [];
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -69,12 +65,12 @@ export default function Home() {
       
       // 全体的な結果を作成
       const batchId = Date.now().toString();
-      const batchData = {
+      const batchData: BatchInfo = {
         batch_id: batchId,
         total_images: files.length,
         processed_at: new Date().toISOString(),
         image_urls: results.map(result => result.optimizedUrl),
-        status: 'completed',
+        status: 'completed' as const,
         processed: results.length,
         failed: errors.length,
         results,
@@ -85,17 +81,17 @@ export default function Home() {
       if (results.length === 0 && errors.length > 0) {
         throw new Error(`すべての画像の処理に失敗しました: ${errors[0].error}`);
       }
-      
-      // APIレスポンス受信後、ProcessingStatusに完了を通知
-      if (window && (window as any).completeProcessing) {
-        (window as any).completeProcessing();
+
+      // ProcessingStatusに完了を通知
+      if (typeof window !== 'undefined' && window.completeProcessing) {
+        window.completeProcessing();
       }
-      
+
       // 少し遅延してからダウンロード画面を表示
       setTimeout(() => {
         setBatchInfo(batchData);
         setProcessing(false);
-      }, 2000);
+      }, PROCESSING_COMPLETE_DELAY_MS);
       
     } catch (error) {
       console.error('処理エラー:', error);
@@ -170,14 +166,7 @@ export default function Home() {
         <ImageUploader onUpload={handleUpload} disabled={processing} />
       )}
       
-      {processing && (
-        <ProcessingStatus 
-          onComplete={() => {
-            // ProcessingStatusから完了通知を受け取ったときの処理
-            console.log('Processing completed!');
-          }}
-        />
-      )}
+      {processing && <ProcessingStatus />}
       
       {batchInfo && !processing && (
         <DownloadManager 

@@ -2,6 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+// 定数定義
+const PROGRESS_UPDATE_INTERVAL_MS = 900;
+const PROGRESS_MAX_AUTO = 90;
+const COMPLETE_CALLBACK_DELAY_MS = 1000;
+
 interface Props {
   onComplete?: () => void;
 }
@@ -32,19 +37,19 @@ export default function ProcessingStatus({ onComplete }: Props) {
   useEffect(() => {
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 90) return prev; // 90%で停止
-        
+        if (prev >= PROGRESS_MAX_AUTO) return prev;
+
         const increment = Math.random() * 2.5 + 0.8;
-        const newProgress = Math.min(prev + increment, 90);
-        
+        const newProgress = Math.min(prev + increment, PROGRESS_MAX_AUTO);
+
         // ステップ更新（最後のステップまで進まないように調整）
-        const stepProgress = (newProgress / 90) * (steps.length - 1);
+        const stepProgress = (newProgress / PROGRESS_MAX_AUTO) * (steps.length - 1);
         const newStep = Math.floor(stepProgress);
         setCurrentStep(Math.min(newStep, steps.length - 2)); // 最後から2番目まで
-        
+
         return newProgress;
       });
-    }, 900);
+    }, PROGRESS_UPDATE_INTERVAL_MS);
 
     return () => clearInterval(progressInterval);
   }, [steps.length]);
@@ -55,22 +60,21 @@ export default function ProcessingStatus({ onComplete }: Props) {
     setCurrentStep(steps.length - 1);
     setTimeout(() => {
       onComplete && onComplete();
-    }, 1000); // 1秒後に完了コールバックを実行
+    }, COMPLETE_CALLBACK_DELAY_MS);
   }, [onComplete, steps.length]);
 
-  // プロップスを外部に公開（useImperativeHandleの代替）
+  // windowオブジェクトに関数を公開（外部から呼び出し可能にする）
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      (window as any).completeProcessing = completeProcessing;
-      
-      // クリーンアップ
+      window.completeProcessing = completeProcessing;
+
       return () => {
         if (typeof window !== 'undefined') {
-          delete (window as any).completeProcessing;
+          delete window.completeProcessing;
         }
       };
     }
-  }, [completeProcessing, onComplete]);
+  }, [completeProcessing]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

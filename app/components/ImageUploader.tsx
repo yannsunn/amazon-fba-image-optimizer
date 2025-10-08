@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
 import Image from 'next/image';
@@ -15,28 +15,45 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isCompressing, setIsCompressing] = useState(false);
   const [outputSizes, setOutputSizes] = useState<string[]>(['2000x2000']);
+  const previewsRef = useRef<string[]>([]);
+
+  // サイズ選択のトグルハンドラー
+  const handleSizeToggle = useCallback((size: string, checked: boolean) => {
+    if (checked) {
+      setOutputSizes(prev => [...prev, size]);
+    } else {
+      setOutputSizes(prev => prev.filter(s => s !== size));
+    }
+  }, []);
+
+  // previewsの参照を常に最新に保つ
+  useEffect(() => {
+    previewsRef.current = previews;
+  }, [previews]);
 
   // コンポーネントアンマウント時のメモリクリーンアップ
   useEffect(() => {
     return () => {
-      previews.forEach(url => URL.revokeObjectURL(url));
+      previewsRef.current.forEach(url => URL.revokeObjectURL(url));
     };
-  }, [previews]);
+  }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
+    let filesToProcess = acceptedFiles;
+
     if (acceptedFiles.length > 8) {
       alert('最大8枚まで選択可能です');
-      acceptedFiles = acceptedFiles.slice(0, 8);
+      filesToProcess = acceptedFiles.slice(0, 8);
     }
 
-    // 既存のプレビューをクリア
-    previews.forEach(url => URL.revokeObjectURL(url));
+    // 既存のプレビューをクリア（refを使用して最新の参照にアクセス）
+    previewsRef.current.forEach(url => URL.revokeObjectURL(url));
 
     // 新しいプレビューを生成
-    const newPreviews = acceptedFiles.map(file => URL.createObjectURL(file));
+    const newPreviews = filesToProcess.map(file => URL.createObjectURL(file));
     setPreviews(newPreviews);
-    setSelectedFiles(acceptedFiles);
-  }, [previews]);
+    setSelectedFiles(filesToProcess);
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive, acceptedFiles } = useDropzone({
     onDrop,
@@ -49,12 +66,20 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
   });
 
   const removeFile = (index: number) => {
+    // 境界チェック
+    if (index < 0 || index >= previews.length) {
+      console.warn('Invalid index for removeFile:', index);
+      return;
+    }
+
     const newFiles = selectedFiles.filter((_, i) => i !== index);
     const newPreviews = previews.filter((_, i) => i !== index);
-    
+
     // 削除されるプレビューのURLを解放
-    URL.revokeObjectURL(previews[index]);
-    
+    if (previews[index]) {
+      URL.revokeObjectURL(previews[index]);
+    }
+
     setSelectedFiles(newFiles);
     setPreviews(newPreviews);
   };
@@ -142,13 +167,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
                   type="checkbox"
                   value="2000x2000"
                   checked={outputSizes.includes('2000x2000')}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setOutputSizes([...outputSizes, e.target.value]);
-                    } else {
-                      setOutputSizes(outputSizes.filter(size => size !== e.target.value));
-                    }
-                  }}
+                  onChange={(e) => handleSizeToggle(e.target.value, e.target.checked)}
                   className="sr-only"
                 />
                 <div className={`flex-1 ${outputSizes.includes('2000x2000') ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
@@ -169,13 +188,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
                   type="checkbox"
                   value="970x600"
                   checked={outputSizes.includes('970x600')}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setOutputSizes([...outputSizes, e.target.value]);
-                    } else {
-                      setOutputSizes(outputSizes.filter(size => size !== e.target.value));
-                    }
-                  }}
+                  onChange={(e) => handleSizeToggle(e.target.value, e.target.checked)}
                   className="sr-only"
                 />
                 <div className={`flex-1 ${outputSizes.includes('970x600') ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>
@@ -196,13 +209,7 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
                   type="checkbox"
                   value="300x300"
                   checked={outputSizes.includes('300x300')}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setOutputSizes([...outputSizes, e.target.value]);
-                    } else {
-                      setOutputSizes(outputSizes.filter(size => size !== e.target.value));
-                    }
-                  }}
+                  onChange={(e) => handleSizeToggle(e.target.value, e.target.checked)}
                   className="sr-only"
                 />
                 <div className={`flex-1 ${outputSizes.includes('300x300') ? 'text-primary-600 font-semibold' : 'text-gray-700'}}`}>

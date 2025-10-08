@@ -2,23 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-
-interface BatchInfo {
-  batch_id: string;
-  total_images: number;
-  processed_at: string;
-  image_urls: string[];
-  status: string;
-  results?: Array<{
-    originalName: string;
-    outputSize: string;
-    optimizedUrl: string;
-    dimensions: {
-      width: number;
-      height: number;
-    };
-  }>;
-}
+import { BatchInfo } from '../types/batch';
 
 interface Props {
   batchInfo: BatchInfo;
