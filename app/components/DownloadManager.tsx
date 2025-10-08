@@ -26,53 +26,9 @@ interface Props {
 }
 
 export default function DownloadManager({ batchInfo, onReset }: Props) {
-  const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [downloadingIndividual, setDownloadingIndividual] = useState(false);
 
-  const handleDownload = async () => {
-    setDownloading(true);
-    setDownloadError(null);
-    
-    try {
-      // 画像URLとresults情報をPOSTボディで送信
-      const response = await fetch(`/api/batch/${batchInfo.batch_id}/download`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          urls: batchInfo.image_urls,
-          results: batchInfo.results 
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      // ZIPファイルをダウンロード
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      
-      // ダウンロードリンクを作成
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `amazon-fba-optimized-${batchInfo.batch_id}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // メモリを解放
-      window.URL.revokeObjectURL(url);
-      
-    } catch (error) {
-      console.error('ダウンロードエラー:', error);
-      setDownloadError(error instanceof Error ? error.message : 'ダウンロード中にエラーが発生しました');
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   const handleIndividualDownload = async (imageUrl: string, index: number) => {
     try {
@@ -195,67 +151,34 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
       {/* ダウンロードオプション */}
       <div className="card">
         <h3 className="text-xl font-semibold mb-4">💾 ダウンロードオプション</h3>
-        
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* 一括ダウンロード（ZIP） */}
-          <div className="p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100">
-            <h4 className="font-semibold text-blue-700 mb-2">📦 一括ダウンロード</h4>
-            <p className="text-sm text-gray-600 mb-3">
-              すべての画像をZIPファイルでまとめてダウンロード
-            </p>
-            <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {downloading ? (
-                <>
-                  <svg className="inline animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  ダウンロード中...
-                </>
-              ) : (
-                <>
-                  <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  ZIPでダウンロード
-                </>
-              )}
-            </button>
-          </div>
 
-          {/* 個別ダウンロード（一括自動） */}
-          <div className="p-4 border rounded-lg bg-gradient-to-br from-green-50 to-green-100">
-            <h4 className="font-semibold text-green-700 mb-2">🖼️ 個別ファイルダウンロード</h4>
-            <p className="text-sm text-gray-600 mb-3">
-              画像を個別ファイルとして一括自動ダウンロード
-            </p>
-            <button
-              onClick={handleDownloadAllIndividually}
-              disabled={downloadingIndividual}
-              className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {downloadingIndividual ? (
-                <>
-                  <svg className="inline animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  ダウンロード中...
-                </>
-              ) : (
-                <>
-                  <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8" />
-                  </svg>
-                  個別ファイルで一括取得
-                </>
-              )}
-            </button>
-          </div>
+        <div className="p-4 border rounded-lg bg-gradient-to-br from-green-50 to-green-100">
+          <h4 className="font-semibold text-green-700 mb-2">🖼️ 個別ファイルダウンロード</h4>
+          <p className="text-sm text-gray-600 mb-3">
+            画像を個別ファイルとして一括自動ダウンロード
+          </p>
+          <button
+            onClick={handleDownloadAllIndividually}
+            disabled={downloadingIndividual}
+            className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {downloadingIndividual ? (
+              <>
+                <svg className="inline animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                ダウンロード中...
+              </>
+            ) : (
+              <>
+                <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8" />
+                </svg>
+                すべての画像をダウンロード
+              </>
+            )}
+          </button>
         </div>
       </div>
 
