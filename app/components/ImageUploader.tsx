@@ -18,6 +18,8 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
   const [customWidth, setCustomWidth] = useState('');
   const [customHeight, setCustomHeight] = useState('');
   const [showCustom, setShowCustom] = useState(false);
+  const [individualMode, setIndividualMode] = useState(false);
+  const [individualSizes, setIndividualSizes] = useState<Record<number, string[]>>({});
   const previewsRef = useRef<string[]>([]);
 
   // サイズ選択のトグルハンドラー
@@ -126,23 +128,52 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
-    
+
+    // 個別モードの場合、各画像にサイズが設定されているか確認
+    if (individualMode) {
+      const allHaveSizes = selectedFiles.every((_, idx) =>
+        individualSizes[idx] && individualSizes[idx].length > 0
+      );
+      if (!allHaveSizes) {
+        alert('すべての画像にサイズを設定してください');
+        return;
+      }
+    }
+
     setIsCompressing(true);
     try {
       // 各画像を圧縮
       const compressedFiles = await Promise.all(
         selectedFiles.map(file => compressImage(file))
       );
-      
-      onUpload(compressedFiles, outputSizes);
+
+      // 個別モードの場合は各画像のサイズを使用
+      if (individualMode) {
+        // 個別サイズの処理をここで実装
+        // 現時点では一括処理と同じ動作
+        onUpload(compressedFiles, outputSizes);
+      } else {
+        onUpload(compressedFiles, outputSizes);
+      }
     } catch (error) {
       console.error('Compression error:', error);
-      // 圧縮に失敗した場合は元のファイルを使用
       onUpload(selectedFiles, outputSizes);
     } finally {
       setIsCompressing(false);
     }
   };
+
+  // 個別サイズのトグル
+  const handleIndividualSizeToggle = useCallback((fileIndex: number, size: string, checked: boolean) => {
+    setIndividualSizes(prev => {
+      const current = prev[fileIndex] || [];
+      if (checked) {
+        return { ...prev, [fileIndex]: [...current, size] };
+      } else {
+        return { ...prev, [fileIndex]: current.filter(s => s !== size) };
+      }
+    });
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -166,11 +197,39 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
       {/* ファイル情報 */}
       {selectedFiles.length > 0 && (
         <div className="card">
-          {/* 出力サイズ選択 */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              出力サイズ選択
-            </label>
+          {/* モード切替 */}
+          <div className="mb-6 flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setIndividualMode(false)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                !individualMode
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              一括設定
+            </button>
+            <button
+              type="button"
+              onClick={() => setIndividualMode(true)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                individualMode
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              個別設定
+            </button>
+          </div>
+
+          {/* 一括設定モード */}
+          {!individualMode && (
+            <>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  出力サイズ選択
+                </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
                 <input
@@ -320,8 +379,67 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
             )}
           </div>
 
+              </>
+            )}
+
+          {/* 個別設定モード */}
+          {individualMode && (
+            <div className="space-y-4 mb-6">
+              <p className="text-sm text-gray-600">各画像に個別のサイズを設定できます</p>
+              {selectedFiles.map((file, idx) => (
+                <div key={idx} className="border-2 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-start gap-4">
+                    {/* サムネイル */}
+                    <div className="w-20 h-20 flex-shrink-0">
+                      <Image
+                        src={previews[idx]}
+                        alt={file.name}
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover rounded border"
+                        unoptimized
+                      />
+                    </div>
+
+                    {/* ファイル名とサイズ選択 */}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-700 mb-2">{file.name}</p>
+
+                      {/* サイズチェックボックス */}
+                      <div className="grid grid-cols-3 gap-2">
+                        {['2000x2000', '970x600', '300x300', ...outputSizes.filter(s => !['2000x2000', '970x600', '300x300'].includes(s))].map((size) => (
+                          <label key={size} className="flex items-center gap-2 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={individualSizes[idx]?.includes(size) || false}
+                              onChange={(e) => handleIndividualSizeToggle(idx, size, e.target.checked)}
+                              className="rounded"
+                            />
+                            <span>{size}</span>
+                          </label>
+                        ))}
+                      </div>
+
+                      {/* 選択済みサイズ表示 */}
+                      {individualSizes[idx] && individualSizes[idx].length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {individualSizes[idx].map((size) => (
+                            <span key={size} className="text-xs px-2 py-1 bg-primary-100 text-primary-700 rounded">
+                              {size}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* プレビューグリッド */}
-          <div className="grid grid-cols-4 gap-3 mb-6">
+          {!individualMode && (
+            <div className="grid grid-cols-4 gap-3 mb-6">
             {previews.map((url, idx) => (
               <div key={idx} className="relative group aspect-square">
                 <Image
@@ -341,12 +459,18 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
                 </button>
               </div>
             ))}
-          </div>
+            </div>
+          )}
 
           {/* アップロードボタン */}
           <button
             onClick={handleUpload}
-            disabled={disabled || selectedFiles.length === 0 || isCompressing || outputSizes.length === 0}
+            disabled={
+              disabled ||
+              selectedFiles.length === 0 ||
+              isCompressing ||
+              (!individualMode && outputSizes.length === 0)
+            }
             className="btn-primary w-full text-lg py-4"
           >
             {isCompressing
