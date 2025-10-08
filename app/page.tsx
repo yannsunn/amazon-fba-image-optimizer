@@ -14,7 +14,7 @@ export default function Home() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUpload = async (files: File[], outputSizes: string[] = ['2000x2000']) => {
+  const handleUpload = async (files: File[], outputSizes: string[] | string[][] = ['2000x2000']) => {
     setProcessing(true);
     setError(null);
 
@@ -22,12 +22,21 @@ export default function Home() {
       // 各ファイルを個別にアップロード（分割アップロード）
       const results: ProcessingResult[] = [];
       const errors: ProcessingError[] = [];
-      
+
+      // 個別サイズモードかどうかを判定
+      const isIndividualMode = Array.isArray(outputSizes[0]);
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const formData = new FormData();
         formData.append('images', file);
-        formData.append('outputSizes', JSON.stringify(outputSizes));
+
+        // 個別モードの場合は各ファイルのサイズを使用、一括モードは全体のサイズを使用
+        const sizesForThisFile = isIndividualMode
+          ? (outputSizes as string[][])[i]
+          : (outputSizes as string[]);
+
+        formData.append('outputSizes', JSON.stringify(sizesForThisFile));
         
         try {
           const response = await fetch('/api/process', {

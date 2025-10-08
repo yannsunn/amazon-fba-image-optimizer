@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import Image from 'next/image';
 
 interface Props {
-  onUpload: (files: File[], outputSizes: string[]) => void;
+  onUpload: (files: File[], outputSizes: string[] | string[][]) => void;
   disabled: boolean;
 }
 
@@ -147,17 +147,25 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
         selectedFiles.map(file => compressImage(file))
       );
 
-      // 個別モードの場合は各画像のサイズを使用
+      // 個別モードの場合は各画像のサイズを配列として送信
       if (individualMode) {
-        // 個別サイズの処理をここで実装
-        // 現時点では一括処理と同じ動作
-        onUpload(compressedFiles, outputSizes);
+        const individualSizesArray = selectedFiles.map((_, idx) =>
+          individualSizes[idx] || []
+        );
+        onUpload(compressedFiles, individualSizesArray);
       } else {
         onUpload(compressedFiles, outputSizes);
       }
     } catch (error) {
       console.error('Compression error:', error);
-      onUpload(selectedFiles, outputSizes);
+      if (individualMode) {
+        const individualSizesArray = selectedFiles.map((_, idx) =>
+          individualSizes[idx] || []
+        );
+        onUpload(selectedFiles, individualSizesArray);
+      } else {
+        onUpload(selectedFiles, outputSizes);
+      }
     } finally {
       setIsCompressing(false);
     }
