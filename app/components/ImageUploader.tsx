@@ -15,6 +15,9 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isCompressing, setIsCompressing] = useState(false);
   const [outputSizes, setOutputSizes] = useState<string[]>(['2000x2000']);
+  const [customWidth, setCustomWidth] = useState('');
+  const [customHeight, setCustomHeight] = useState('');
+  const [showCustom, setShowCustom] = useState(false);
   const previewsRef = useRef<string[]>([]);
 
   // サイズ選択のトグルハンドラー
@@ -25,6 +28,25 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
       setOutputSizes(prev => prev.filter(s => s !== size));
     }
   }, []);
+
+  // カスタムサイズ追加
+  const handleAddCustomSize = useCallback(() => {
+    const width = parseInt(customWidth);
+    const height = parseInt(customHeight);
+
+    if (isNaN(width) || isNaN(height) || width < 1 || height < 1 || width > 5000 || height > 5000) {
+      alert('1〜5000の範囲で幅と高さを入力してください');
+      return;
+    }
+
+    const customSize = `${width}x${height}`;
+    if (!outputSizes.includes(customSize)) {
+      setOutputSizes(prev => [...prev, customSize]);
+    }
+    setCustomWidth('');
+    setCustomHeight('');
+    setShowCustom(false);
+  }, [customWidth, customHeight, outputSizes]);
 
   // previewsの参照を常に最新に保つ
   useEffect(() => {
@@ -215,6 +237,86 @@ export default function ImageUploader({ onUpload, disabled }: Props) {
             </div>
             {outputSizes.length === 0 && (
               <p className="text-sm text-error-600 mt-2">少なくとも1つ選択</p>
+            )}
+          </div>
+
+          {/* カスタムサイズ */}
+          <div className="mb-6">
+            {!showCustom ? (
+              <button
+                type="button"
+                onClick={() => setShowCustom(true)}
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              >
+                ＋ カスタムサイズを追加
+              </button>
+            ) : (
+              <div className="border-2 border-primary-200 rounded-lg p-4 bg-primary-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <input
+                    type="number"
+                    placeholder="幅"
+                    value={customWidth}
+                    onChange={(e) => setCustomWidth(e.target.value)}
+                    className="w-24 px-3 py-2 border rounded-lg text-center"
+                    min="1"
+                    max="5000"
+                  />
+                  <span className="text-gray-500">×</span>
+                  <input
+                    type="number"
+                    placeholder="高さ"
+                    value={customHeight}
+                    onChange={(e) => setCustomHeight(e.target.value)}
+                    className="w-24 px-3 py-2 border rounded-lg text-center"
+                    min="1"
+                    max="5000"
+                  />
+                  <span className="text-xs text-gray-500">px</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleAddCustomSize}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium"
+                  >
+                    追加
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCustom(false);
+                      setCustomWidth('');
+                      setCustomHeight('');
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 選択済みサイズ一覧 */}
+            {outputSizes.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {outputSizes.map((size) => (
+                  <div
+                    key={size}
+                    className="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
+                  >
+                    <span>{size}</span>
+                    <button
+                      type="button"
+                      onClick={() => setOutputSizes(prev => prev.filter(s => s !== size))}
+                      className="hover:text-primary-900"
+                      aria-label={`${size}を削除`}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
