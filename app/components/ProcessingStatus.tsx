@@ -84,94 +84,40 @@ export default function ProcessingStatus({ onComplete }: Props) {
 
   return (
     <div className="card">
-      <div className="text-center mb-6">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
+      <div className="text-center mb-8">
+        <div className="animate-spin rounded-full h-20 w-20 border-b-4 border-primary-600 mx-auto mb-6"></div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          画像処理中
+          処理中
         </h2>
         <p className="text-gray-600">
-          AI技術を使用して画像を最適化しています...
+          {steps[currentStep]}
         </p>
       </div>
 
       {/* プログレスバー */}
       <div className="mb-6">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
-          <span>進捗</span>
+        <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
           <span>{Math.round(progress)}%</span>
+          <span>{formatTime(elapsedTime)}</span>
         </div>
-        <div className="progress-bar">
-          <div 
+        <div className="progress-bar h-3">
+          <div
             className="progress-fill"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
       </div>
 
-      {/* 現在のステップ */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-medium text-gray-900">
-            {steps[currentStep]}
-          </span>
-          <span className="text-sm text-gray-500">
-            {formatTime(elapsedTime)}
-          </span>
-        </div>
-        <div className="text-sm text-gray-600">
-          ステップ {currentStep + 1} / {steps.length}
-        </div>
-      </div>
-
-      {/* 処理ステップ一覧 */}
-      <div className="space-y-2">
-        {steps.map((step, index) => (
-          <div 
+      {/* ステップインジケーター */}
+      <div className="flex justify-center items-center space-x-2">
+        {steps.map((_, index) => (
+          <div
             key={index}
-            className={`flex items-center text-sm ${
-              index < currentStep 
-                ? 'text-success-600' 
-                : index === currentStep 
-                  ? 'text-primary-600 font-medium' 
-                  : 'text-gray-400'
+            className={`h-2 rounded-full transition-all ${
+              index <= currentStep ? 'w-8 bg-primary-600' : 'w-2 bg-gray-300'
             }`}
-          >
-            <div className={`w-4 h-4 rounded-full mr-3 flex items-center justify-center ${
-              index < currentStep 
-                ? 'bg-success-500' 
-                : index === currentStep 
-                  ? 'bg-primary-500' 
-                  : 'bg-gray-300'
-            }`}>
-              {index < currentStep ? (
-                <span className="text-white text-xs">✓</span>
-              ) : index === currentStep ? (
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              ) : (
-                <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-              )}
-            </div>
-            {step}
-          </div>
+          />
         ))}
-      </div>
-
-      {/* 処理時間の目安 */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-medium text-gray-900 mb-2">処理時間の目安</h3>
-        <div className="text-sm text-gray-600 space-y-1">
-          <div>• 1枚: 約30秒〜1分</div>
-          <div>• 2-4枚: 約1分〜2分</div>
-          <div>• 5-8枚: 約2分〜3分</div>
-        </div>
-      </div>
-
-      {/* 注意事項 */}
-      <div className="mt-4 p-4 bg-warning-50 border border-warning-200 rounded-lg">
-        <p className="text-sm text-warning-700">
-          <span role="img" aria-label="電球">💡</span> 処理中はブラウザを閉じないでください。
-          処理が完了するまでお待ちください。
-        </p>
       </div>
     </div>
   );

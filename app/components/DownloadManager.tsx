@@ -75,47 +75,12 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
     <div className="space-y-6">
       {/* 完了メッセージ */}
       <div className="card bg-success-50 border-success-200">
-        <div className="flex items-center mb-4">
-          <div className="text-success-500 mr-3 text-2xl">✅</div>
-          <div>
-            <h2 className="text-2xl font-bold text-success-700">
-              処理完了！
-            </h2>
-            <p className="text-success-600">
-              {batchInfo.total_images}枚の画像が正常に最適化されました
-            </p>
-          </div>
-        </div>
-
-        {/* バッチ情報 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-success-700">
-              {batchInfo.total_images}
-            </div>
-            <div className="text-sm text-success-600">元画像数</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-success-700">
-              {batchInfo.results ? batchInfo.results.length : batchInfo.image_urls.length}
-            </div>
-            <div className="text-sm text-success-600">生成画像数</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-success-700">
-              {batchInfo.results && batchInfo.results.length > 0
-                ? [...new Set(batchInfo.results.map(r => r.outputSize))].join(', ')
-                : '2000×2000'}
-            </div>
-            <div className="text-sm text-success-600">出力サイズ</div>
-          </div>
-        </div>
-
-        {/* 処理詳細 */}
-        <div className="text-sm text-success-600 space-y-1">
-          <div>バッチID: {batchInfo.batch_id}</div>
-          <div>処理完了: {processedDate}</div>
-          <div>ステータス: {batchInfo.status}</div>
+        <div className="text-center">
+          <div className="text-5xl mb-3">✅</div>
+          <h2 className="text-2xl font-bold text-success-700 mb-2">完了</h2>
+          <p className="text-success-600">
+            {batchInfo.results ? batchInfo.results.length : batchInfo.image_urls.length}枚生成
+          </p>
         </div>
       </div>
 
@@ -132,49 +97,32 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
         </div>
       )}
 
-      {/* ダウンロードオプション */}
+      {/* 一括ダウンロード */}
       <div className="card">
-        <h3 className="text-xl font-semibold mb-4">💾 ダウンロードオプション</h3>
-
-        <div className="p-4 border rounded-lg bg-gradient-to-br from-green-50 to-green-100">
-          <h4 className="font-semibold text-green-700 mb-2">🖼️ 個別ファイルダウンロード</h4>
-          <p className="text-sm text-gray-600 mb-3">
-            画像を個別ファイルとして一括自動ダウンロード
-          </p>
-          <button
-            onClick={handleDownloadAllIndividually}
-            disabled={downloadingIndividual}
-            className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {downloadingIndividual ? (
-              <>
-                <svg className="inline animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                ダウンロード中...
-              </>
-            ) : (
-              <>
-                <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8" />
-                </svg>
-                すべての画像をダウンロード
-              </>
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handleDownloadAllIndividually}
+          disabled={downloadingIndividual}
+          className="w-full bg-primary-600 text-white px-6 py-4 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg font-medium"
+        >
+          {downloadingIndividual ? (
+            <>
+              <svg className="inline animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              ダウンロード中...
+            </>
+          ) : (
+            <>
+              ⬇️ すべてダウンロード
+            </>
+          )}
+        </button>
       </div>
 
-      {/* 個別ダウンロード */}
-      <div id="individual-downloads" className="card">
-        <h3 className="text-xl font-semibold mb-4">🖼️ 個別ダウンロード</h3>
-        
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">
-            💡 ヒント: 画像をクリックすると個別にダウンロードできます
-          </p>
-        </div>
+      {/* 画像プレビュー */}
+      <div className="card">
+        <h3 className="text-lg font-semibold mb-4">画像一覧</h3>
         
         {batchInfo.results ? (
           // 画像をグループ化して表示
@@ -187,15 +135,15 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
                 return groups;
               }, {} as Record<string, typeof batchInfo.results>)
             ).map(([originalName, results], groupIndex) => (
-              <div key={groupIndex} className="border rounded-lg p-4 bg-gray-50">
-                <h4 className="font-semibold text-gray-700 mb-3">📄 {originalName}</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div key={groupIndex} className="space-y-3">
+                <h4 className="font-medium text-gray-700 text-sm">{originalName}</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {results.map((result, index) => (
-                    <div key={index} className="space-y-2">
+                    <div key={index}>
                       <div className="relative group cursor-pointer" onClick={() => handleIndividualDownload(result.optimizedUrl, groupIndex * 10 + index)}>
                         <Image
                           src={result.optimizedUrl}
-                          alt={`${originalName} - ${result.outputSize}`}
+                          alt={result.outputSize}
                           width={200}
                           height={160}
                           className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-colors"
@@ -209,15 +157,8 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
                           </div>
                         </div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-sm font-medium text-gray-700">{result.outputSize}</div>
-                        <div className="text-xs text-gray-500">{result.dimensions.width}×{result.dimensions.height}px</div>
-                        <button
-                          onClick={() => handleIndividualDownload(result.optimizedUrl, groupIndex * 10 + index)}
-                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline mt-1"
-                        >
-                          ダウンロード
-                        </button>
+                      <div className="text-center mt-1">
+                        <div className="text-xs font-medium text-gray-700">{result.outputSize}</div>
                       </div>
                     </div>
                   ))}
@@ -262,34 +203,13 @@ export default function DownloadManager({ batchInfo, onReset }: Props) {
         )}
       </div>
 
-      {/* 使用方法 */}
-      <div className="card bg-primary-50 border-primary-200">
-        <h3 className="text-lg font-semibold text-primary-700 mb-2">
-          🎯 Amazon FBAでの使用方法
-        </h3>
-        <ol className="text-sm text-primary-600 space-y-1">
-          <li>1. 最適化された画像をダウンロード</li>
-          <li>2. Amazon Seller Centralにログイン</li>
-          <li>3. 商品ページの編集画面で画像を更新</li>
-          <li>4. メイン画像を最初にアップロード</li>
-          <li>5. 追加画像を順番にアップロード</li>
-          <li>6. 変更を保存して公開</li>
-        </ol>
-      </div>
-
-      {/* アクションボタン */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* やり直しボタン */}
+      <div className="text-center">
         <button
           onClick={onReset}
-          className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
+          className="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
         >
-          新しい画像を処理
-        </button>
-        <button
-          onClick={() => window.location.reload()}
-          className="flex-1 bg-primary-500 text-white py-3 px-6 rounded-lg hover:bg-primary-600 transition-colors"
-        >
-          ページを更新
+          ← 最初に戻る
         </button>
       </div>
     </div>
